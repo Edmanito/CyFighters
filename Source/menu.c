@@ -1,6 +1,8 @@
-#include "../Include/fighter.h"
 #include <string.h>
-#include <time.h>
+#include "data.h"
+#include "logic.h"
+#include "interface.h"
+
 //test//
 // Variables globales réelles
 int mode_choisi = 0;
@@ -24,7 +26,7 @@ Page afficher_chargement(SDL_Renderer *rendu) {
     SDL_Rect zone_barre = {60, 500, 900, 30};
     SDL_Rect zone_texte = {zone_barre.x, zone_barre.y + 40, 400, 30};
 
-    SDL_Surface *surf_texte = TTF_RenderUTF8_Blended(police, "Chargement en cours...", blanc);
+    SDL_Surface *surf_texte = TTF_RenderUTF8_Solid(police, "Chargement en cours...", blanc);
     SDL_Texture *texture_texte = SDL_CreateTextureFromSurface(rendu, surf_texte);
     SDL_FreeSurface(surf_texte);
 
@@ -45,7 +47,6 @@ Page afficher_chargement(SDL_Renderer *rendu) {
             };
             SDL_RenderFillRect(rendu, &bloc);
         }
-//fzfes
         SDL_RenderCopy(rendu, texture_texte, NULL, &zone_texte);
         SDL_RenderPresent(rendu);
 
@@ -119,7 +120,7 @@ Page afficher_histoire(SDL_Renderer* rendu) {
 
         for (int i = 0; i <= phrase; i++) {
             if (lettres[i] > 0) {
-                SDL_Surface* surf = TTF_RenderUTF8_Blended(police, affichage[i], blanc);
+                SDL_Surface* surf = TTF_RenderUTF8_Solid(police, affichage[i], blanc);
                 if (surf) {
                     SDL_Texture* tex = SDL_CreateTextureFromSurface(rendu, surf);
                     SDL_Rect rect = {
@@ -194,7 +195,7 @@ void jouer_musique(const char* chemin, int volume) {
 
 // === MENU PRINCIPAL ===
 Page afficher_menu(SDL_Renderer* rendu) {
-    jouer_musique("Ressource/musique/Wav/menu.wav", 20);
+    //jouer_musique("Ressource/musique/Wav/menu.wav", 20);
 
     SDL_Texture* fond = IMG_LoadTexture(rendu, "Ressource/image/Fonds/fond_menu.png");
     SDL_Texture* cadre_titre = IMG_LoadTexture(rendu, "Ressource/image/Cadres/cadre_titre.png");
@@ -217,7 +218,7 @@ Page afficher_menu(SDL_Renderer* rendu) {
 
     for (int i = 0; i < 3; i++) {
         SDL_RenderCopy(rendu, cadre_bouton, NULL, &boutons[i]);
-        SDL_Surface* surf = TTF_RenderUTF8_Blended(police, textes[i], noir);
+        SDL_Surface* surf = TTF_RenderUTF8_Solid(police, textes[i], noir);
         SDL_Texture* tex = SDL_CreateTextureFromSurface(rendu, surf);
         SDL_Rect txt = {
             boutons[i].x + (boutons[i].w - surf->w) / 2,
@@ -281,7 +282,7 @@ Page afficher_options(SDL_Renderer* rendu, Page page_prec) {
 
         for (int i = 0; i < 3; i++) {
             SDL_RenderCopy(rendu, cadre_bouton, NULL, &boutons[i]);
-            SDL_Surface* surf = TTF_RenderUTF8_Blended(police, textes[i], noir);
+            SDL_Surface* surf = TTF_RenderUTF8_Solid(police, textes[i], noir);
             SDL_Texture* tex = SDL_CreateTextureFromSurface(rendu, surf);
             SDL_Rect txt = {
                 boutons[i].x + (boutons[i].w - surf->w) / 2,
@@ -310,35 +311,75 @@ Page afficher_options(SDL_Renderer* rendu, Page page_prec) {
 }
 
 // === PAGE DE JEU ===
-Page afficher_jeu(SDL_Renderer* rendu) {
+Page afficher_jeu(SDL_Renderer* rendu, SDL_Texture* selections_j1[3], SDL_Texture* selections_j2[3]) {
+    // Fond noir
     SDL_SetRenderDrawColor(rendu, 0, 0, 0, 255);
     SDL_RenderClear(rendu);
 
+    // Afficher les personnages sélectionnés
+    const int taille_perso = 100;
+    const int marge = 50;
+    
+    // Afficher l'équipe du joueur 1 (gauche)
+    for (int i = 0; i < 3; i++) {
+        if (selections_j1[i]) {
+            SDL_Rect dest = {
+                marge,
+                marge + i * (taille_perso + 20),
+                taille_perso,
+                taille_perso
+            };
+            SDL_RenderCopy(rendu, selections_j1[i], NULL, &dest);
+        }
+    }
+
+    // Afficher l'équipe du joueur 2 (droite)
+    for (int i = 0; i < 3; i++) {
+        if (selections_j2[i]) {
+            SDL_Rect dest = {
+                LARGEUR_FENETRE - marge - taille_perso,
+                marge + i * (taille_perso + 20),
+                taille_perso,
+                taille_perso
+            };
+            SDL_RenderCopy(rendu, selections_j2[i], NULL, &dest);
+        }
+    }
+
+    // Texte "JEU EN COURS..."
     TTF_Font* police = TTF_OpenFont("Ressource/langue/Police/arial.ttf", 40);
-    SDL_Color blanc = {255, 255, 255, 255};
-    SDL_Surface* surf = TTF_RenderUTF8_Blended(police, "JEU EN COURS...", blanc);
-    SDL_Texture* texte = SDL_CreateTextureFromSurface(rendu, surf);
+    if (police) {
+        SDL_Color blanc = {255, 255, 255, 255};
+        SDL_Surface* surf = TTF_RenderUTF8_Solid(police, "JEU EN COURS...", blanc);
+        if (surf) {
+            SDL_Texture* texte = SDL_CreateTextureFromSurface(rendu, surf);
+            if (texte) {
+                SDL_Rect rect = {
+                    (LARGEUR_FENETRE - surf->w) / 2,
+                    HAUTEUR_FENETRE - 100,
+                    surf->w,
+                    surf->h
+                };
+                SDL_RenderCopy(rendu, texte, NULL, &rect);
+                SDL_DestroyTexture(texte);
+            }
+            SDL_FreeSurface(surf);
+        }
+        TTF_CloseFont(police);
+    }
 
-    SDL_Rect rect = {
-        (LARGEUR_FENETRE - surf->w) / 2,
-        (HAUTEUR_FENETRE - surf->h) / 2,
-        surf->w,
-        surf->h
-    };
-
-    SDL_RenderCopy(rendu, texte, NULL, &rect);
     SDL_RenderPresent(rendu);
 
-    SDL_FreeSurface(surf);
-    SDL_DestroyTexture(texte);
-    TTF_CloseFont(police);
-
+    // Gestion des événements
     SDL_Event event;
     while (1) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) return PAGE_QUITTER;
-            if (event.type == SDL_MOUSEBUTTONDOWN) return PAGE_MENU;
+            if (event.type == SDL_KEYDOWN || event.type == SDL_MOUSEBUTTONDOWN) {
+                return PAGE_MENU;
+            }
         }
+        SDL_Delay(16); // Limite à ~60 FPS
     }
 }
 
@@ -378,7 +419,7 @@ Page afficher_selec_mode(SDL_Renderer* rendu) {
             SDL_RenderCopy(rendu, cadre_bouton, NULL, &boutons[i]);
 
             for (int j = 0; j < 3; j++) {
-                SDL_Surface* surf = TTF_RenderUTF8_Blended(police, textes[i][j], noir);
+                SDL_Surface* surf = TTF_RenderUTF8_Solid(police, textes[i][j], noir);
                 SDL_Texture* tex = SDL_CreateTextureFromSurface(rendu, surf);
 
                 SDL_Rect txt = {
@@ -458,7 +499,7 @@ Page afficher_selec_difficulte(SDL_Renderer* rendu) {
 
         for (int i = 0; i < 3; i++) {
             SDL_RenderCopy(rendu, cadre_bouton, NULL, &boutons[i]);
-            SDL_Surface* surf = TTF_RenderUTF8_Blended(police, textes[i], noir);
+            SDL_Surface* surf = TTF_RenderUTF8_Solid(police, textes[i], noir);
             SDL_Texture* tex = SDL_CreateTextureFromSurface(rendu, surf);
             SDL_Rect txt = {
                 boutons[i].x + (boutons[i].w - surf->w) / 2,
@@ -475,39 +516,38 @@ Page afficher_selec_difficulte(SDL_Renderer* rendu) {
         SDL_RenderPresent(rendu);
 
         while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT)
+            if (event.type == SDL_QUIT) {
                 return PAGE_QUITTER;
-
-            if (event.type == SDL_MOUSEBUTTONDOWN) {
+            }
+        
+            if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
                 int x = event.button.x, y = event.button.y;
-
-                // Clic sur "Facile"
-                if (x >= boutons[0].x && x <= boutons[0].x + boutons[0].w &&
-                    y >= boutons[0].y && y <= boutons[0].y + boutons[0].h)
-                    return PAGE_SELECTION_PERSO;
-
-                // Clic sur "Moyen"
-                if (x >= boutons[1].x && x <= boutons[1].x + boutons[1].w &&
-                    y >= boutons[1].y && y <= boutons[1].y + boutons[1].h)
-                    return PAGE_SELECTION_PERSO;
-
-                // Clic sur "Difficile"
-                if (x >= boutons[2].x && x <= boutons[2].x + boutons[2].w &&
-                    y >= boutons[2].y && y <= boutons[2].y + boutons[2].h)
-                    return PAGE_SELECTION_PERSO;
 
                 // Clic sur retour
                 if (x >= retour.x && x <= retour.x + retour.w &&
-                    y >= retour.y && y <= retour.y + retour.h)
+                    y >= retour.y && y <= retour.y + retour.h) {
                     return PAGE_SELEC_MODE;
+                }
+                
+                // Clic sur "Facile"
+                if (x >= boutons[0].x && x <= boutons[0].x + boutons[0].w &&
+                    y >= boutons[0].y && y <= boutons[0].y + boutons[0].h) {
+                    return PAGE_SELECTION_PERSO;
+                }
+        
+                // Clic sur "Moyen"
+                if (x >= boutons[1].x && x <= boutons[1].x + boutons[1].w &&
+                    y >= boutons[1].y && y <= boutons[1].y + boutons[1].h) {
+                    return PAGE_SELECTION_PERSO;
+                }
+        
+                // Clic sur "Difficile"
+                if (x >= boutons[2].x && x <= boutons[2].x + boutons[2].w &&
+                    y >= boutons[2].y && y <= boutons[2].y + boutons[2].h) {
+                    return PAGE_SELECTION_PERSO;
+                }
+        
             }
         }
     }
-
-    SDL_DestroyTexture(fond);
-    SDL_DestroyTexture(cadre_bouton);
-    SDL_DestroyTexture(bouton_retour);
-    TTF_CloseFont(police);
-    //ezfez
-    return PAGE_MENU;
 }

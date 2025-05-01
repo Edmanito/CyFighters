@@ -3,7 +3,9 @@
 #include <string.h>
 //test
 
-#include "fighter.h"
+#include "data.h"
+#include "logic.h"
+#include "interface.h"
 
 #define NB_TEXTES 20
 
