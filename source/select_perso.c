@@ -9,12 +9,24 @@
 #include <time.h>
 #include <stdbool.h>
 
+
+
+
+
 Fighter persoChoisi[6];
+int index_selection[6];
+
+
+
 void runGame(SDL_Renderer* rendu);
 
 
 
 Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3], SDL_Texture* selections_j2[3]) {
+	
+	arreter_musique("ressource/musique/ogg/menu.ogg");	
+	jouerMusique("ressource/musique/ogg/selection_personnages.ogg", 40);
+
 
     // --- CHARGEMENT DES TEXTURES ---
     SDL_Texture* fond_texture = IMG_LoadTexture(rendu, "ressource/image/fonds/fond_selection_perso.png");
@@ -32,10 +44,10 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
     }
 
     SDL_Rect dest_logo = {
-        (LARGEUR_FENETRE - 80) / 2,
+        (LARGEUR_FENETRE - 200) / 2,
         10,
-        80,
-        80
+        200,
+        200
     };
 
     // --- BOUTON RETOUR ---
@@ -103,7 +115,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
         return PAGE_QUITTER;
     }
 
-    SDL_Color couleur_blanc = {255, 255, 255, 255};
+    SDL_Color couleur_blanc = {213, 38, 35, 255};
     SDL_Surface* surface_tour = NULL;
     SDL_Texture* texture_tour = NULL;
 
@@ -112,33 +124,36 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
     int a = 0;
     
     while (running && (nb_selections_j1 < 3 || nb_selections_j2 < 3)) {
-        // Mise à jour texte tour
+        // Mise à jour texte tour avec contour et gras
         if (surface_tour) SDL_FreeSurface(surface_tour);
         if (texture_tour) SDL_DestroyTexture(texture_tour);
-        
+    
         const char* texte_tour = tour_j1 ? "Tour du Joueur 1" : "Tour du Joueur 2";
-        surface_tour = TTF_RenderText_Blended(police, texte_tour, couleur_blanc);
-        if (!surface_tour) {
-            SDL_Log("Erreur création surface texte: %s", TTF_GetError());
-            continue;
-        }
-        
+        SDL_Color couleur_texte = tour_j1 ? (SDL_Color){213, 38, 35, 255} : (SDL_Color){25, 118, 210, 255};
+        SDL_Color noir = {0, 0, 0, 255};
+    
+        // Mettre en gras
+        TTF_SetFontStyle(police, TTF_STYLE_BOLD);
+    
+        // Création contour noir
+        TTF_SetFontOutline(police, 4);
+        SDL_Surface* surface_outline = TTF_RenderText_Blended(police, texte_tour, noir);
+        SDL_Texture* texture_outline = SDL_CreateTextureFromSurface(rendu, surface_outline);
+    
+        // Création texte coloré
+        TTF_SetFontOutline(police, 0);
+        surface_tour = TTF_RenderText_Blended(police, texte_tour, couleur_texte);
         texture_tour = SDL_CreateTextureFromSurface(rendu, surface_tour);
-        if (!texture_tour) {
-            SDL_Log("Erreur création texture texte: %s", SDL_GetError());
-            SDL_FreeSurface(surface_tour);
-            continue;
-        }
-        
+    
         SDL_Rect rect_tour = {
-
             (LARGEUR_FENETRE - surface_tour->w) / 2,
-            marge_haut + mini_size + 20,
+            marge_haut + mini_size + 80,
             surface_tour->w,
             surface_tour->h
         };
-
+    
         SDL_Event event;
+    
         
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
@@ -154,6 +169,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                     mouseX <= btn_retour_rect.x + btn_retour_rect.w &&
                     mouseY >= btn_retour_rect.y && 
                     mouseY <= btn_retour_rect.y + btn_retour_rect.h) {
+        	    jouerMusique("ressource/musique/ogg/menu.ogg", 20);
                     running = false;
                     return PAGE_SELEC_MODE;
                 }
@@ -174,6 +190,8 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
 
                         if (mouseX >= pos_perso.x && mouseX <= pos_perso.x + pos_perso.w &&
                             mouseY >= pos_perso.y && mouseY <= pos_perso.y + pos_perso.h) {
+                            
+                            jouer_effet("ressource/musique/ogg/persoClique.ogg", 40);  // ← AJOUT ICI
 
                             if (tour_j1 && nb_selections_j1 < 3) {
                                 selections_j1[nb_selections_j1] = portraits[i];
@@ -197,8 +215,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     persoChoisi[a].agilite=darkshadow.agilite;
                                     persoChoisi[a].vitesse=darkshadow.vitesse;
                                     persoChoisi[a].element=darkshadow.element;
-                                    
-                            
+                                    index_selection[a] = i;
                                     break;
                                
                                 case 1:
@@ -211,6 +228,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     persoChoisi[a].agilite=hitsugaya.agilite;
                                     persoChoisi[a].vitesse=hitsugaya.vitesse;
                                     persoChoisi[a].element=hitsugaya.element;
+                                    index_selection[a] = i;
                                     break;
                                 case 2:
                                 
@@ -222,6 +240,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     persoChoisi[a].agilite=incassable.agilite;
                                     persoChoisi[a].vitesse=incassable.vitesse;
                                     persoChoisi[a].element=incassable.element;
+                                    index_selection[a] = i;
                                     break;
                                 
                                 case 3:
@@ -234,6 +253,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     persoChoisi[a].agilite=katara.agilite;
                                     persoChoisi[a].vitesse=katara.vitesse;
                                     persoChoisi[a].element=katara.element;
+                                    index_selection[a] = i;
                                     break;
                                 
                                 case 4:
@@ -246,6 +266,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     persoChoisi[a].agilite=kirua.agilite;
                                     persoChoisi[a].vitesse=kirua.vitesse;
                                     persoChoisi[a].element=kirua.element;
+                                    index_selection[a] = i;
                                     break;
                                     
                                 case 5:
@@ -258,6 +279,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     persoChoisi[a].agilite=rengoku.agilite;
                                     persoChoisi[a].vitesse=rengoku.vitesse;
                                     persoChoisi[a].element=rengoku.element;
+                                    index_selection[a] = i;
                                     break;
                                     
                                 case 6:
@@ -270,6 +292,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     persoChoisi[a].agilite=temari.agilite;
                                     persoChoisi[a].vitesse=temari.vitesse;
                                     persoChoisi[a].element=temari.element;
+                                    index_selection[a] = i;
                                     break;
                                     
                                 case 7:
@@ -282,7 +305,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     persoChoisi[a].agilite=zoro.agilite;
                                     persoChoisi[a].vitesse=zoro.vitesse;
                                     persoChoisi[a].element=zoro.element;
-
+                                    index_selection[a] = i;
                                     break;
 
                                 default :
@@ -294,6 +317,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     persoChoisi[a].agilite=lukas.agilite;
                                     persoChoisi[a].vitesse=lukas.vitesse;
                                     persoChoisi[a].element=lukas.element;
+            
                                     break;
                             }
                             
@@ -303,6 +327,8 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
 
                             if(tour_j1) SDL_Log("Perso %d l'équipe 1 est : %s",a + 1, persoChoisi[a].nom);
                             else SDL_Log("Perso %d de l'équipe 2 est : %s",a + 1, persoChoisi[a].nom);
+                            
+                            index_selection[a] = i;
                             a = a + 1;
                             tour_j1 = !tour_j1;
                             
@@ -394,7 +420,6 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
 
 
 Page afficher_confirmation_perso(SDL_Renderer* rendu, SDL_Texture* equipe1[3], SDL_Texture* equipe2[3]) {
-    // Chargement des textures
     SDL_Texture* fond_texture = IMG_LoadTexture(rendu, "ressource/image/fonds/fond_selection_perso.png");
     SDL_Texture* btn_avancer_texture = IMG_LoadTexture(rendu, "ressource/image/utilité/avance.png");
     SDL_Texture* btn_retour_texture = IMG_LoadTexture(rendu, "ressource/image/utilité/retour.png");
@@ -408,9 +433,36 @@ Page afficher_confirmation_perso(SDL_Renderer* rendu, SDL_Texture* equipe1[3], S
         return PAGE_QUITTER;
     }
 
+    SDL_Texture* textures_pixel[6] = {NULL};
+
+    // Chargement des textures pixelisées selon l'ordre de sélection (J1-J2 alterné)
+    for (int i = 0; i < 3; i++) {
+        // Joueur 1 : index pair (0, 2, 4)
+        int idx_j1 = i * 2;
+        if (idx_j1 < 6) {
+            char chemin[256];
+            snprintf(chemin, sizeof(chemin), "ressource/image/personnages_pixel/%s.png", persoChoisi[idx_j1].nom);
+            textures_pixel[i] = IMG_LoadTexture(rendu, chemin);
+            if (!textures_pixel[i]) {
+                SDL_Log("Erreur chargement image %s : %s", chemin, SDL_GetError());
+            }
+        }
+
+        // Joueur 2 : index impair (1, 3, 5)
+        int idx_j2 = i * 2 + 1;
+        if (idx_j2 < 6) {
+            char chemin[256];
+            snprintf(chemin, sizeof(chemin), "ressource/image/personnages_pixel/%s_reverse.png", persoChoisi[idx_j2].nom);
+            textures_pixel[i + 3] = IMG_LoadTexture(rendu, chemin);
+            if (!textures_pixel[i + 3]) {
+                SDL_Log("Erreur chargement image %s : %s", chemin, SDL_GetError());
+            }
+        }
+    }
+
     const SDL_Rect btn_retour_rect = {20, HAUTEUR_FENETRE - 100, 80, 80};
     const SDL_Rect btn_avancer_rect = {LARGEUR_FENETRE - 100, HAUTEUR_FENETRE - 100, 80, 80};
-    const SDL_Rect vs_rect = {LARGEUR_FENETRE / 2 - 40, HAUTEUR_FENETRE / 2 - 40, 80, 80};
+    const SDL_Rect vs_rect = {LARGEUR_FENETRE / 2 - 40, HAUTEUR_FENETRE / 2 - 40, 200, 200};
 
     const int largeur_perso = 150;
     const int hauteur_perso = 150;
@@ -431,11 +483,7 @@ Page afficher_confirmation_perso(SDL_Renderer* rendu, SDL_Texture* equipe1[3], S
                 SDL_Point mouse = {event.button.x, event.button.y};
                 if (SDL_PointInRect(&mouse, &btn_avancer_rect)) {
                     running = false;
-                    
-                    
                     runGame(rendu);
-                    
-                    
                     return PAGE_COMBAT;
                 } else if (SDL_PointInRect(&mouse, &btn_retour_rect)) {
                     running = false;
@@ -445,38 +493,32 @@ Page afficher_confirmation_perso(SDL_Renderer* rendu, SDL_Texture* equipe1[3], S
         }
 
         SDL_RenderClear(rendu);
-
-        // 1. Afficher le fond d'abord
         SDL_RenderCopy(rendu, fond_texture, NULL, NULL);
 
-        // 2. Afficher les personnages des deux équipes
         for (int i = 0; i < 3; i++) {
-            if (equipe1[i]) {
-                SDL_Rect dest = {
+            // Joueur 1
+            if (textures_pixel[i]) {
+                SDL_Rect dest1 = {
                     start_x_j1,
                     marge_haut + i * (hauteur_perso + espacement),
                     largeur_perso,
                     hauteur_perso
                 };
-                SDL_RenderCopy(rendu, equipe1[i], NULL, &dest);
-                //printf("test %d",i);
-
+                SDL_RenderCopy(rendu, textures_pixel[i], NULL, &dest1);
             }
 
-
-            if (equipe2[i]) {
-                SDL_Rect dest = {
+            // Joueur 2
+            if (textures_pixel[i + 3]) {
+                SDL_Rect dest2 = {
                     start_x_j2,
                     marge_haut + i * (hauteur_perso + espacement),
                     largeur_perso,
                     hauteur_perso
                 };
-                SDL_RenderCopy(rendu, equipe2[i], NULL, &dest);
-                //printf("test %d",i);
+                SDL_RenderCopy(rendu, textures_pixel[i + 3], NULL, &dest2);
             }
         }
 
-        // 3. Interface par-dessus
         SDL_RenderCopy(rendu, btn_retour_texture, NULL, &btn_retour_rect);
         SDL_RenderCopy(rendu, vs_texture, NULL, &vs_rect);
         SDL_RenderCopy(rendu, btn_avancer_texture, NULL, &btn_avancer_rect);
@@ -484,7 +526,10 @@ Page afficher_confirmation_perso(SDL_Renderer* rendu, SDL_Texture* equipe1[3], S
         SDL_RenderPresent(rendu);
     }
 
-    // Libération
+    for (int i = 0; i < 6; i++) {
+        if (textures_pixel[i]) SDL_DestroyTexture(textures_pixel[i]);
+    }
+
     SDL_DestroyTexture(fond_texture);
     SDL_DestroyTexture(btn_avancer_texture);
     SDL_DestroyTexture(btn_retour_texture);

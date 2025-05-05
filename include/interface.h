@@ -21,6 +21,7 @@ typedef enum {
     PAGE_CONFIRMATION_PERSO,
     PAGE_COMBAT,
     PAGE_OPTIONS,
+    //PAGE_SON,
     PAGE_HISTOIRE,
     PAGE_QUITTER
 } Page;

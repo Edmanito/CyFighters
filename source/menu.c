@@ -190,11 +190,16 @@ Page afficher_menu(SDL_Renderer* rendu){
     TTF_Font* police = TTF_OpenFont("ressource/langue/police/arial.ttf", 40);
     SDL_Color noir = {0, 0, 0, 255};
 
-    SDL_Rect zone_titre = {262, 0, 500, 250};
+    int tailleTitre = 250;
+    int tailleBouton = 190;
+    int largeurBouton = 280;
+    int largeurTitre = 500;
+
+    SDL_Rect zone_titre = {LARGEUR_FENETRE/2 - largeurTitre/2, 10, largeurTitre, tailleTitre};
     SDL_Rect boutons[3] = {
-        {370, 160, 280, 190},
-        {370, 280, 280, 190},
-        {370, 400, 280, 190}
+        {LARGEUR_FENETRE/2 - largeurBouton/2, 200, largeurBouton, tailleBouton},
+        {LARGEUR_FENETRE/2 - largeurBouton/2, 350, largeurBouton, tailleBouton},
+        {LARGEUR_FENETRE/2 - largeurBouton/2, 500, largeurBouton, tailleBouton}
     };
     const char* textes[] = {"Jouer", "Options", "Quitter"};
 
@@ -244,20 +249,51 @@ Page afficher_menu(SDL_Renderer* rendu){
     return PAGE_MENU;
 }
 
+/*
+Page affiche_son(SDL_Renderer* rendu, Page page_prec){
+    SDL_Texture* fond = IMG_LoadTexture(rendu, "ressource/image/fonds/fond_menu.png");
+
+
+}
+*/
+
+
 // === OPTIONS ===
 Page afficher_options(SDL_Renderer* rendu, Page page_prec) {
     SDL_Texture* fond = IMG_LoadTexture(rendu, "ressource/image/fonds/fond_menu.png");
     SDL_Texture* cadre_bouton = IMG_LoadTexture(rendu, "ressource/image/cadres/cadre_texte.png");
     SDL_Texture* bouton_retour = IMG_LoadTexture(rendu, "ressource/image/utilité/retour.png");
 
-    const char* textes[] = {"Sauvegarde", "Langue", "Son"};
+    
+    
+    
+    
+    
+    
+    
+    
+    const char* textes[] = {"Crédit", "Langue", "Son"};
     SDL_Color noir = {0, 0, 0, 255};
     TTF_Font* police = TTF_OpenFont("ressource/langue/police/arial.ttf", 40);
+/*
+    int tailleTitre = 250;
+    int tailleBouton = 190;
+    int largeurBouton = 280;
+    int largeurTitre = 500;
+
+    SDL_Rect zone_titre = {LARGEUR_FENETRE/2 - largeurTitre/2, 10, largeurTitre, tailleTitre};
+    SDL_Rect boutons[3] = {
+        {LARGEUR_FENETRE/2 - largeurBouton/2, 200, largeurBouton, tailleBouton},
+        {LARGEUR_FENETRE/2 - largeurBouton/2, 350, largeurBouton, tailleBouton},
+        {LARGEUR_FENETRE/2 - largeurBouton/2, 500, largeurBouton, tailleBouton
+*/
+    int tailleBouton_bis = 190;
+    int largeurBouton_bis = 280;
 
     SDL_Rect boutons[3] = {
-        {370, 160, 280, 190},
-        {370, 280, 280, 190},
-        {370, 400, 280, 190}
+        {LARGEUR_FENETRE/2 - largeurBouton_bis/2, 200, largeurBouton_bis, tailleBouton_bis},
+        {LARGEUR_FENETRE/2 - largeurBouton_bis/2, 350, largeurBouton_bis, tailleBouton_bis},
+        {LARGEUR_FENETRE/2 - largeurBouton_bis/2, 500, largeurBouton_bis, tailleBouton_bis}
     };
     SDL_Rect retour_rect = {20, HAUTEUR_FENETRE - 100, 80, 80};
 
