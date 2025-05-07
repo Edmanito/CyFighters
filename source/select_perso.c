@@ -1,5 +1,4 @@
 #include "data.h"
-#include "logic.h"
 #include "interface.h"
 #include "son.h"
 #include "attaque.h"
@@ -24,9 +23,9 @@ void runGame(SDL_Renderer* rendu);
 
 Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3], SDL_Texture* selections_j2[3]) {
 	
-	arreter_musique("ressource/musique/ogg/menu.ogg");	
+	arreter_musique("ressource/musique/ogg/menu_1.ogg");	
 	jouerMusique("ressource/musique/ogg/selection_personnages.ogg", 40);
-
+    init_attaques();
 
     // --- CHARGEMENT DES TEXTURES ---
     SDL_Texture* fond_texture = IMG_LoadTexture(rendu, "ressource/image/fonds/fond_selection_perso.png");
@@ -115,7 +114,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
         return PAGE_QUITTER;
     }
 
-    SDL_Color couleur_blanc = {213, 38, 35, 255};
+    //SDL_Color couleur_blanc = {213, 38, 35, 255};
     SDL_Surface* surface_tour = NULL;
     SDL_Texture* texture_tour = NULL;
 
@@ -130,15 +129,9 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
     
         const char* texte_tour = tour_j1 ? "Tour du Joueur 1" : "Tour du Joueur 2";
         SDL_Color couleur_texte = tour_j1 ? (SDL_Color){213, 38, 35, 255} : (SDL_Color){25, 118, 210, 255};
-        SDL_Color noir = {0, 0, 0, 255};
     
         // Mettre en gras
         TTF_SetFontStyle(police, TTF_STYLE_BOLD);
-    
-        // Création contour noir
-        TTF_SetFontOutline(police, 4);
-        SDL_Surface* surface_outline = TTF_RenderText_Blended(police, texte_tour, noir);
-        SDL_Texture* texture_outline = SDL_CreateTextureFromSurface(rendu, surface_outline);
     
         // Création texte coloré
         TTF_SetFontOutline(police, 0);
@@ -169,7 +162,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                     mouseX <= btn_retour_rect.x + btn_retour_rect.w &&
                     mouseY >= btn_retour_rect.y && 
                     mouseY <= btn_retour_rect.y + btn_retour_rect.h) {
-        	    jouerMusique("ressource/musique/ogg/menu.ogg", 20);
+        	    jouerMusique("ressource/musique/ogg/menu_1.ogg", 20);
                     running = false;
                     return PAGE_SELEC_MODE;
                 }
@@ -215,6 +208,9 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     persoChoisi[a].agilite=darkshadow.agilite;
                                     persoChoisi[a].vitesse=darkshadow.vitesse;
                                     persoChoisi[a].element=darkshadow.element;
+                                    persoChoisi[a].spe_atq1 = crepuscule;
+                                    persoChoisi[a].spe_atq2 = hurlementNoir;
+                                    persoChoisi[a].spe_atq3 = brumeProtectrice;
                                     index_selection[a] = i;
                                     break;
                                
@@ -228,6 +224,9 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     persoChoisi[a].agilite=hitsugaya.agilite;
                                     persoChoisi[a].vitesse=hitsugaya.vitesse;
                                     persoChoisi[a].element=hitsugaya.element;
+                                    persoChoisi[a].spe_atq1 = prisonDeGivre;
+                                    persoChoisi[a].spe_atq2 = blizzard;
+                                    persoChoisi[a].spe_atq3 = glaceCurative;
                                     index_selection[a] = i;
                                     break;
                                 case 2:
@@ -240,6 +239,9 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     persoChoisi[a].agilite=incassable.agilite;
                                     persoChoisi[a].vitesse=incassable.vitesse;
                                     persoChoisi[a].element=incassable.element;
+                                    persoChoisi[a].spe_atq1 = murVivant;
+                                    persoChoisi[a].spe_atq2 = barriereDePierre;
+                                    persoChoisi[a].spe_atq3 = rugissementDacier;
                                     index_selection[a] = i;
                                     break;
                                 
@@ -253,6 +255,9 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     persoChoisi[a].agilite=katara.agilite;
                                     persoChoisi[a].vitesse=katara.vitesse;
                                     persoChoisi[a].element=katara.element;
+                                    persoChoisi[a].spe_atq1 = lienDeSang;
+                                    persoChoisi[a].spe_atq2 = vagueGuerisseuse;
+                                    persoChoisi[a].spe_atq3 = eveilLunaire;
                                     index_selection[a] = i;
                                     break;
                                 
@@ -266,6 +271,9 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     persoChoisi[a].agilite=kirua.agilite;
                                     persoChoisi[a].vitesse=kirua.vitesse;
                                     persoChoisi[a].element=kirua.element;
+                                    persoChoisi[a].spe_atq1 = fulgurance;
+                                    persoChoisi[a].spe_atq2 = foudreEnchainee;
+                                    persoChoisi[a].spe_atq3 = executionRapide;
                                     index_selection[a] = i;
                                     break;
                                     
@@ -279,6 +287,9 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     persoChoisi[a].agilite=rengoku.agilite;
                                     persoChoisi[a].vitesse=rengoku.vitesse;
                                     persoChoisi[a].element=rengoku.element;
+                                    persoChoisi[a].spe_atq1 = flammesSolaires;
+                                    persoChoisi[a].spe_atq2 = explosionArdente;
+                                    persoChoisi[a].spe_atq3 = espritFlamboyant;
                                     index_selection[a] = i;
                                     break;
                                     
@@ -292,6 +303,9 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     persoChoisi[a].agilite=temari.agilite;
                                     persoChoisi[a].vitesse=temari.vitesse;
                                     persoChoisi[a].element=temari.element;
+                                    persoChoisi[a].spe_atq1 = danseDuVent;
+                                    persoChoisi[a].spe_atq2 = ventPercant;
+                                    persoChoisi[a].spe_atq3 = souffleDeVie;
                                     index_selection[a] = i;
                                     break;
                                     
@@ -305,6 +319,9 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     persoChoisi[a].agilite=zoro.agilite;
                                     persoChoisi[a].vitesse=zoro.vitesse;
                                     persoChoisi[a].element=zoro.element;
+                                    persoChoisi[a].spe_atq1 = affutageMortal;
+                                    persoChoisi[a].spe_atq2 = assautTranchant;
+                                    persoChoisi[a].spe_atq3 = eveilDuSabre;
                                     index_selection[a] = i;
                                     break;
 
@@ -321,9 +338,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     break;
                             }
                             
-                            persoChoisi[a].spe_atq1 = affutageMortal;
-                            persoChoisi[a].spe_atq2 = assautTranchant;
-                            persoChoisi[a].spe_atq3 = eveilDuSabre;
+                           
 
                             if(tour_j1) SDL_Log("Perso %d l'équipe 1 est : %s",a + 1, persoChoisi[a].nom);
                             else SDL_Log("Perso %d de l'équipe 2 est : %s",a + 1, persoChoisi[a].nom);
