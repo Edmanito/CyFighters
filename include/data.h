@@ -1,19 +1,33 @@
-// Include/data.h
 #ifndef DATA_H
 #define DATA_H
 
-#include <time.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_mixer.h>
 
+// === Constantes générales ===
+#define NB_PERSOS_EQUIPE 3
+#define MAX_NOM_ATTAQUE 50
+#define MAX_DESCRIPTION 300
+#define MAX_SPECIAL 3
+#define MAX_EFFETS 3
+#define MAX_NOM_PERSO 50
 
+// === Éléments ===
+typedef enum {
+    ELEMENT_NONE,
+    ELEMENT_CRISTAL,
+    ELEMENT_GLACE,
+    ELEMENT_FEU,
+    ELEMENT_ECLAIR,
+    ELEMENT_VENT,
+    ELEMENT_EAU,
+    ELEMENT_OMBRE
+} ElementType;
 
-
-extern SDL_Window* fenetre;
-
+// === ID des attaques spéciales ===
 typedef enum {
     ATTAQUE_BASIQUE = 0,
     DEFENSE,
@@ -41,23 +55,42 @@ typedef enum {
     ATQ_MUR_VIVANT,
     ATQ_BARRIERE_DE_PIERRE,
     ATQ_RUGISSEMENT_D_ACIER,
-
     NB_ATTAQUES_TOTAL
 } AttaqueID;
 
-// ==== Définition des éléments ====
-typedef enum {
-    ELEMENT_NONE,
-    ELEMENT_CRISTAL,
-    ELEMENT_GLACE,
-    ELEMENT_FEU,
-    ELEMENT_ECLAIR,
-    ELEMENT_VENT,
-    ELEMENT_EAU,
-    ELEMENT_OMBRE
-} ElementType;
+// === Structures principales ===
+typedef struct {
+    char nom[MAX_NOM_ATTAQUE];
+    char description[MAX_DESCRIPTION];
+    int id;
+    int cout;
+    int type;
+} AttaqueSpecial;
 
-// ==== Bonus de map ====
+typedef struct {
+    char nom[MAX_NOM_PERSO];
+    int actu_pv, max_pv;
+    int attaque, defense, agilite, vitesse, magie;
+    int pt;
+    int statutEffet; 
+    ElementType element;
+    AttaqueSpecial spe_atq1, spe_atq2, spe_atq3;
+} Fighter;
+
+typedef struct {
+    Fighter fighter1, fighter2, fighter3;
+} Joueur;
+
+typedef struct {
+    Joueur joueur1, joueur2;
+    int perso_actif;
+    int tour;
+    int equipeQuiCommence;
+    bool fin;
+    int mapType;
+    bool nuit;
+} Partie;
+
 typedef struct {
     int bonus_attaque;
     int bonus_defense;
@@ -66,121 +99,44 @@ typedef struct {
     int bonus_pv;
 } BonusMap;
 
-// ==== Statuts d'effet ====
-typedef enum {
-    Aucun = 0,
-    BRULE,
-    PARALYSIE,
-    GEL,
-    SAIGNEMENT,
-    BOOST_DEF,
-    BOOST_PV,
-    BOOST_VIT
-} StatutEffet;
-
-// ==== Attaques spéciales ====
-#define MAX_NOM_ATTAQUE 50
-#define MAX_DESCRIPTION 300
-#define MAX_SPECIAL 3
-#define MAX_EFFETS 3
-
 typedef struct {
-    char nom[MAX_NOM_ATTAQUE];
-    char description[MAX_DESCRIPTION];
-    int id;
-    int cout;
-} AttaqueSpecial;
-
-// ==== Fighters ====
-#define MAX_NOM_PERSO 50
-typedef struct {
-    char nom[MAX_NOM_PERSO];
-    int actu_pv;
-    int max_pv;
-    int attaque;
-    int defense;
-    int agilite;
-    int vitesse;
-    int pt;
-    ElementType element;
-    AttaqueSpecial spe_atq1;
-    AttaqueSpecial spe_atq2;
-    AttaqueSpecial spe_atq3;
-} Fighter;
-
-
-
-typedef struct {
-    Fighter fighter1;
-    Fighter fighter2;
-    Fighter fighter3;
-
-} Joueur;
-
-
-
-typedef struct{
-    Joueur joueur1;
-    Joueur joueur2;
-
-    int perso_actif; 
-    int tour;
-    bool fin;
-
-    int mapType; // 1 = feu, 2 = glace, etc
-    bool nuit;
-
-} Partie;
-
-
+    int idAttaque;
+    int utilisateurNum, utilisateurEquipe;
+    int cibleNum, cibleEquipe;
+} AttaqueSauvegarde;
 
 typedef struct {
     SDL_Rect rect;
-    SDL_Color baseColor;
-    SDL_Color hoverColor;
+    SDL_Color baseColor, hoverColor;
     bool hovered;
     const char* text;
 } Button;
 
-typedef struct{
-    int idAttaque;
-    int utilisateurNum;
-    int utilisateurEquipe;
-    int cibleNum;
-    int cibleEquipe;
-} AttaqueSauvegarde;
-
-extern AttaqueSpecial* toutes_les_attaques[NB_ATTAQUES_TOTAL];
-extern void (*fonctions_attaques[NB_ATTAQUES_TOTAL])(Fighter*, Fighter*);
-
+// === Fonctions utilitaires ===
+Fighter* get_fighter(int equipe, int numero);
 Fighter* get_fighter_by_index(int index);
 int get_equipe_id(int index);
 int get_fighter_num(int index);
-
-extern Fighter darkshadow;
-extern Fighter hitsugaya;
-extern Fighter incassable;
-extern Fighter katara;
-extern Fighter kirua;
-extern Fighter rengoku;
-extern Fighter temari;
-extern Fighter zoro;
-extern Fighter lukas;
-
-extern Joueur equipe1;
-extern Partie partieActuelle;
-extern Fighter persoChoisi[];
-
-extern AttaqueSpecial Test1;
-extern AttaqueSpecial Test2;
-extern AttaqueSpecial Test3;
-
+Fighter creer_fighter(const char* nom, int actu_pv, int max_pv, int attaque, int defense, int agilite, int vitesse, ElementType element, AttaqueSpecial** attaques);
+void appliquer_buffs(Fighter* perso, BonusMap bonus);
+bool equipe_est_morte(int equipe);
 void runGame(SDL_Renderer* rendu);
 
+// === Variables globales ===
+extern SDL_Window* fenetre;
+extern int screenWidth;
+extern int screenHeight;
+extern Partie partieActuelle;
+extern Fighter persoChoisi[];
+extern AttaqueSpecial* toutes_les_attaques[NB_ATTAQUES_TOTAL];
+extern void (*fonctions_attaques[NB_ATTAQUES_TOTAL])(Fighter*, Fighter*);
 
-Fighter        creer_fighter   (const char* nom, int actu_pv, int max_pv, int attaque,
-                                int defense, int agilite, int vitesse, ElementType element,
-                                AttaqueSpecial** attaques);
-void           appliquer_buffs (Fighter* perso, BonusMap bonus);
+// === Personnages disponibles ===
+extern Fighter darkshadow, hitsugaya, incassable, katara, kirua;
+extern Fighter rengoku, temari, zoro, lukas;
+extern Joueur equipe1;
+
+// === Attaques de test ===
+extern AttaqueSpecial Test1, Test2, Test3;
 
 #endif // DATA_H
