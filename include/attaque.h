@@ -7,8 +7,37 @@
 
 #include "data.h" 
 
+#define ATTAQUE_BASIQUE 0
+#define DEFENSE 1
+#define AFFUTAGE_MORTAL 2
+#define ASSAUT_TRANCHANT 3
+#define EVEIL_DU_SABRE 4
+#define FLAMMES_SOLAIRES 5
+#define EXPLOSION_ARDENTE 6
+#define ESPRIT_FLAMBOYANT 7
+#define PRISON_DE_GIVRE 8
+#define BLIZZARD 9
+#define GLACE_CURATIVE 10
+#define LIEN_DE_SANG 11
+#define VAGUE_GUERISSEUSE 12
+#define EVEIL_LUNAIRE 13
+#define CREPUSCULE 14
+#define HURLEMENT_NOIR 15
+#define BRUME_PROTECTRICE 16
+#define DANSE_DU_VENT 17
+#define VENT_PERÇANT 18
+#define SOUFFLE_DE_VIE 19
+#define FULGURANCE 20
+#define FOUDRE_ENCHAINEE 21
+#define EXECUTION_RAPIDE 22
+#define MUR_VIVANT 23
+#define BARRIERE_DE_PIERRE 24
+#define RUGISSEMENT_D_ACIER 25
+#define NB_ATTAQUES_TOTAL 26
+
 void attaqueClassique(Fighter *attaquant, Fighter *cible);
 void defense(Fighter* attaquant, Fighter* cible);
+void init_attaques();
 
 void attaque_affutage_mortal(Fighter*, Fighter*);
 void attaque_assaut_tranchant(Fighter*, Fighter*);
@@ -54,7 +83,7 @@ extern AttaqueSpecial crepuscule;
 extern AttaqueSpecial hurlementNoir;
 extern AttaqueSpecial brumeProtectrice;
 extern AttaqueSpecial danseDuVent;
-extern AttaqueSpecial sentPercant;
+extern AttaqueSpecial ventPercant;
 extern AttaqueSpecial souffleDeVie;
 extern AttaqueSpecial fulgurance;
 extern AttaqueSpecial foudreEnchainee;
