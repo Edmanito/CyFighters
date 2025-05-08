@@ -323,7 +323,7 @@ Fighter incassable={
     .element = ELEMENT_CRISTAL,
     .pt = 0
 };
-
+//PersoTroll
 Fighter lukas={
     .nom = "LoukasCocasse",
     .actu_pv = 69696969,
