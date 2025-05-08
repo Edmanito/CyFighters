@@ -311,18 +311,17 @@ void attaque_execution_rapide(Fighter* attaquant, Fighter* cible) {
     if (cible->actu_pv < 0) cible->actu_pv = 0;
     if (cible->pt < 10) cible->pt++;
 
-=======
+
 void attaque_execution_rapide(Fighter* attaquant, Fighter* cible) { 
     if(cible->actu_pv < cible->max_pv - cible->max_pv * 0.7){
     	int degats = (attaquant->attaque * 2) * 2 - cible->defense;
     
-<<<<<<< HEAD
     SDL_Log("attaque_mur_vivant (effet à définir)");
 }
 
 void attaque_barriere_de_pierre(Fighter* attaquant, Fighter* cible) {
     attaquant->statutEffet = 3; // Boost défense
-=======
+
     
     SDL_Log("attaque_mur_vivant");
 }
@@ -333,11 +332,9 @@ void attaque_barriere_de_pierre(Fighter* attaquant, Fighter* cible) {
 }
 
 void attaque_rugissement_d_acier(Fighter* attaquant, Fighter* cible) {
-<<<<<<< HEAD
     cible->statutEffet = 3; // Boost défense
     SDL_Log("attaque_rugissement_d_acier");
 }
-=======
     cible->statutEffet = 3;  //Boost la def de ses alliées de 25% pendant 2 tour
     SDL_Log("attaque_rugissement_d_acier");
 }
