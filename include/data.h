@@ -122,6 +122,7 @@ Fighter* get_fighter_by_index(int index);
 int get_equipe_id(int index);
 int get_fighter_num(int index);
 Fighter creer_fighter(const char* nom, int actu_pv, int max_pv, int attaque, int defense, int agilite, int vitesse, ElementType element, AttaqueSpecial** attaques);
+Fighter get_fighter_depuis_nom(int index);
 void appliquer_buffs(Fighter* perso, BonusMap bonus);
 bool equipe_est_morte(int equipe);
 void runGame(SDL_Renderer* rendu);

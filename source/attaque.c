@@ -66,19 +66,6 @@ FonctionAttaque fonctions_attaques[NB_ATTAQUES_TOTAL] = {
 };
 
 
-//Attque classique 
-void attaqueClassique(Fighter* attaquant, Fighter* cible) {
-    int degats = attaquant->attaque * 2 - cible->defense;
-    
-    if (degats < 10) degats = 10;
-
-    cible->actu_pv -= degats;
-    if (cible->actu_pv < 0) cible->actu_pv = 0;
-
-    printf("%s attaque %s (-%d PV)\n", attaquant->nom, cible->nom, degats);
-}
-
-
 // Effet de soin
 void soin_effet(Fighter* lanceur, Fighter* cible, int quantite) {
     int avant = cible->actu_pv;
@@ -90,14 +77,6 @@ void soin_effet(Fighter* lanceur, Fighter* cible, int quantite) {
     cible->actu_pv = apres;
 
     printf("%s soigne %s (+%d PV)\n", lanceur->nom, cible->nom, apres - avant);
-}
-
-// Effet de défense
-void defense_effet(Fighter* lanceur, Fighter* cible, int bonus) {
-    int ancienne_def = cible->defense;
-    cible->defense += bonus;
-
-    printf("%s augmente la défense de %s (+%d DEF)\n", lanceur->nom, cible->nom, cible->defense - ancienne_def);
 }
 
 void defense(Fighter* attaquant, Fighter* cible) {
@@ -141,7 +120,6 @@ void attaque_assaut_tranchant(Fighter* attaquant, Fighter* cible) {
     printf("%s attaque %s (-%d PV)\n", a.nom, c.nom, degats * 2);
 }
 
-    
 void attaque_eveil_du_sabre(Fighter* attaquant, Fighter* cible) {
     attaquant->statutEffet = 4; // Boost attaque
     SDL_Log("attaque_eveil_du_sabre");
@@ -295,11 +273,11 @@ void attaque_foudre_enchainee(Fighter* attaquant, Fighter* cible) {
     printf("%s attaque %s (-%d PV)\n", a.nom, c.nom, degats);
 }
 
-<<<<<<< HEAD
 void attaque_execution_rapide(Fighter* attaquant, Fighter* cible) {
     Fighter a = appliquer_modificateurs(attaquant);
     Fighter c = appliquer_modificateurs(cible);
 
+    int degats;
     if (cible->actu_pv < cible->max_pv * 0.3) {
         degats = (a.attaque * 2) * 2 - c.defense;
     } else {
@@ -311,30 +289,20 @@ void attaque_execution_rapide(Fighter* attaquant, Fighter* cible) {
     if (cible->actu_pv < 0) cible->actu_pv = 0;
     if (cible->pt < 10) cible->pt++;
 
+    SDL_Log("attaque_execution_rapide");
+    printf("%s attaque %s (-%d PV)\n", a.nom, c.nom, degats);
+}
 
-void attaque_execution_rapide(Fighter* attaquant, Fighter* cible) { 
-    if(cible->actu_pv < cible->max_pv - cible->max_pv * 0.7){
-    	int degats = (attaquant->attaque * 2) * 2 - cible->defense;
-    
+void attaque_mur_vivant(Fighter* attaquant, Fighter* cible) {
     SDL_Log("attaque_mur_vivant (effet à définir)");
 }
 
 void attaque_barriere_de_pierre(Fighter* attaquant, Fighter* cible) {
     attaquant->statutEffet = 3; // Boost défense
-
-    
-    SDL_Log("attaque_mur_vivant");
-}
-
-void attaque_barriere_de_pierre(Fighter* attaquant, Fighter* cible) {
-    attaquant->statutEffet = 3; //Boost la def de 50% pendant 2 tour
     SDL_Log("attaque_barriere_de_pierre");
 }
 
 void attaque_rugissement_d_acier(Fighter* attaquant, Fighter* cible) {
     cible->statutEffet = 3; // Boost défense
-    SDL_Log("attaque_rugissement_d_acier");
-}
-    cible->statutEffet = 3;  //Boost la def de ses alliées de 25% pendant 2 tour
     SDL_Log("attaque_rugissement_d_acier");
 }
