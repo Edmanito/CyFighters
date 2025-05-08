@@ -6,9 +6,9 @@ SRC = \
     source/attaque.c \
     source/data.c \
     source/interface.c \
+    source/affichage.c \
     source/jeu.c \
     source/langue.c \
-    source/logique.c \
     source/main.c \
     source/maps.c \
     source/menu.c \
