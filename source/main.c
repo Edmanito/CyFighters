@@ -1,4 +1,5 @@
-#include "logic.h"
+#include "attaque.h"
+#include "data.h"
 #include "interface.h"
 #include "son.h"
 
@@ -68,7 +69,7 @@ int main(int argc, char* argv[]) {
         switch (page) {
             case PAGE_MENU:
                 if (!musique_menu_jouee) {
-                    jouerMusique("ressource/musique/ogg/menu.ogg", 20);
+                    jouerMusique("ressource/musique/ogg/menu/menu_1.ogg", 20);
                     musique_menu_jouee = 1;
                 }
                 page = afficher_menu(rendu);
@@ -100,7 +101,7 @@ int main(int argc, char* argv[]) {
             }
 
             case PAGE_COMBAT:
-                arreter_musique();
+                jouerMusique("ressource/musique/ogg/jeu/combat_1.ogg", 20);
                 musique_menu_jouee = 0;
                 page = afficher_jeu(rendu, selections_j1, selections_j2);
                 break;
@@ -111,6 +112,7 @@ int main(int argc, char* argv[]) {
 
             case PAGE_HISTOIRE:
                 arreter_musique();
+                
                 musique_menu_jouee = 0;
                 page = afficher_histoire(rendu);
                 break;
