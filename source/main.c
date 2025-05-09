@@ -9,9 +9,6 @@
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_mixer.h>
 
-
-printf("test");
-
 SDL_Window* fenetre;
 
 int main(int argc, char* argv[]) {

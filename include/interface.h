@@ -10,7 +10,6 @@
 // === Constantes interface ===
 #define LARGEUR_FENETRE 1280
 #define HAUTEUR_FENETRE 720
-#define ECARTEMENT_PONT 40
 
 typedef enum {
     PAGE_MENU,
@@ -30,6 +29,7 @@ extern int chemin_retour;
 extern int musique_lancee;
 extern int perso_choisi;
 extern Mix_Music* musique_global;
+extern int ecartementPont;
 
 // === Fonctions d'affichage des pages ===
 Page afficher_chargement(SDL_Renderer* rendu);

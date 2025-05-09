@@ -11,13 +11,13 @@
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_mixer.h>
 
-
+int ecartementPont = 40;
 
 AttaqueSauvegarde tableauAttaqueDuTour [NB_PERSOS_EQUIPE * 2];
 
 // ====================== GAMEPLAY ====================
 
-Fighter appliquer_modificateurs(Fighter* original) {
+Fighter appliquer_modificateurs(Fighter* original){
     Fighter copie = *original;
 
     switch (copie.statutEffet) {
@@ -56,6 +56,7 @@ Fighter appliquer_modificateurs(Fighter* original) {
     return copie;
 }
 
+
 void appliquer_et_mettre_a_jour_effets(Fighter* perso) {
     if (perso->dureeEffet <= 0 || perso->statutEffet == 0) return;
 
@@ -82,21 +83,36 @@ void appliquer_et_mettre_a_jour_effets(Fighter* perso) {
     }
 }
 
-AttaqueSauvegarde choisirCible(SDL_Renderer* rendu, int equipeAdverse, AttaqueSauvegarde attaque) {
+
+AttaqueSauvegarde choisirCible(SDL_Renderer* rendu, int equipeCible, AttaqueSauvegarde attaque) {
     bool choisi = false;
     SDL_Event event;
     int mx, my;
-    
-    // chargement de la flèche
+
     SDL_Texture* arrowTexture = IMG_LoadTexture(rendu, "ressource/image/utilité/cibleSelect.png");
     if (!arrowTexture) {
         SDL_Log("Erreur chargement flèche : %s", SDL_GetError());
     }
 
-    int x_start = (equipeAdverse == 1) ? 100 : (LARGEUR_FENETRE - 100 - 100);
-    int direction = (equipeAdverse == 1) ? 1 : -1;
     Fighter* cibles[3];
-    (void)cibles;
+    int x_start, direction;
+
+    if (equipeCible == 1) {
+        cibles[0] = &partieActuelle.joueur1.fighter1;
+        cibles[1] = &partieActuelle.joueur1.fighter2;
+        cibles[2] = &partieActuelle.joueur1.fighter3;
+        x_start = 100;
+        direction = 1;
+    } else if (equipeCible == 2) {
+        cibles[0] = &partieActuelle.joueur2.fighter1;
+        cibles[1] = &partieActuelle.joueur2.fighter2;
+        cibles[2] = &partieActuelle.joueur2.fighter3;
+        x_start = LARGEUR_FENETRE - 100 - 100;
+        direction = -1;
+    } else {
+        SDL_Log("Erreur : équipe cible inconnue (%d)", equipeCible);
+        return attaque;
+    }
 
     while (!choisi) {
         SDL_GetMouseState(&mx, &my);
@@ -105,7 +121,7 @@ AttaqueSauvegarde choisirCible(SDL_Renderer* rendu, int equipeAdverse, AttaqueSa
         // surbrillance avec flèche
         for (int i = 0; i < 3; i++) {
             int x = x_start + direction * i * (100 + 30);
-            int y = (HAUTEUR_FENETRE - 100) / 2 + i * 30 + ECARTEMENT_PONT;
+            int y = (HAUTEUR_FENETRE - 100) / 2 + i * 30 + ecartementPont;
             SDL_Rect zone = {x, y, 100, 100};
 
             if (mx >= zone.x && mx <= zone.x + zone.w &&
@@ -118,20 +134,6 @@ AttaqueSauvegarde choisirCible(SDL_Renderer* rendu, int equipeAdverse, AttaqueSa
             }
         }
 
-        if (equipeAdverse == 1) {
-            cibles[0] = &partieActuelle.joueur1.fighter1;
-            cibles[1] = &partieActuelle.joueur1.fighter2;
-            cibles[2] = &partieActuelle.joueur1.fighter3;
-            x_start = 100;
-            direction = 1;
-        } else {
-            cibles[0] = &partieActuelle.joueur2.fighter1;
-            cibles[1] = &partieActuelle.joueur2.fighter2;
-            cibles[2] = &partieActuelle.joueur2.fighter3;
-            x_start = LARGEUR_FENETRE - 100 - 100; // marge + largeur
-            direction = -1;
-        }
-
         SDL_RenderPresent(rendu);
 
         while (SDL_PollEvent(&event)) {
@@ -140,14 +142,14 @@ AttaqueSauvegarde choisirCible(SDL_Renderer* rendu, int equipeAdverse, AttaqueSa
             } else if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
                 for (int i = 0; i < 3; i++) {
                     int x = x_start + direction * i * (100 + 30);
-                    int y = (HAUTEUR_FENETRE - 100) / 2 + i * 30 + ECARTEMENT_PONT;
+                    int y = (HAUTEUR_FENETRE - 100) / 2 + i * 30 + ecartementPont;
                     SDL_Rect zone = {x, y, 100, 100};
 
                     if (mx >= zone.x && mx <= zone.x + zone.w &&
                         my >= zone.y && my <= zone.y + zone.h) {
-                        attaque.cibleEquipe = equipeAdverse;
+                        attaque.cibleEquipe = equipeCible;
                         attaque.cibleNum = i;
-                        SDL_Log("Cible sélectionnée : perso %d de l'équipe %d", i, equipeAdverse);
+                        SDL_Log("Cible sélectionnée : perso %d de l'équipe %d", i, equipeCible);
                         choisi = true;
                     }
                 }
@@ -160,6 +162,17 @@ AttaqueSauvegarde choisirCible(SDL_Renderer* rendu, int equipeAdverse, AttaqueSa
     if (arrowTexture) SDL_DestroyTexture(arrowTexture);
     return attaque;
 }
+
+
+
+
+
+
+
+
+
+
+
 
 void drawButton(SDL_Renderer* renderer, Button* btn, TTF_Font* font) {
     SDL_Color color = btn->hovered ? btn->hoverColor : btn->baseColor;
@@ -233,6 +246,19 @@ bool isMouseOver(Button* btn, int x, int y) {
     return x >= btn->rect.x && x <= btn->rect.x + btn->rect.w &&
            y >= btn->rect.y && y <= btn->rect.y + btn->rect.h;
 }
+
+
+
+bool est_une_attaque_de_soin(int id) {
+    return id == ATQ_GLACE_CURATIVE ||
+           id == ATQ_VAGUE_GUERISSEUSE ||
+           id == ATQ_SOUFFLE_DE_VIE;
+}
+
+
+
+
+
 
 void actionPerso(SDL_Renderer* renderer, Fighter* persoActuel, int equipeAdverse) {
     TTF_Font* font = TTF_OpenFont("ressource/langue/police/arial.ttf", 32);
@@ -313,7 +339,7 @@ void actionPerso(SDL_Renderer* renderer, Fighter* persoActuel, int equipeAdverse
             } else if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
                 int id = partieActuelle.perso_actif;
                 AttaqueSauvegarde* attaque = &tableauAttaqueDuTour[id];
-
+        
                 if (btnAttaque.hovered) {
                     *attaque = (AttaqueSauvegarde){
                         .idAttaque = ATTAQUE_BASIQUE,
@@ -323,7 +349,7 @@ void actionPerso(SDL_Renderer* renderer, Fighter* persoActuel, int equipeAdverse
                     *attaque = choisirCible(renderer, equipeAdverse, *attaque);
                     if (persoActuel->pt < 10) persoActuel->pt += 1;
                     quit = true;
-
+        
                 } else if (btnDefense.hovered) {
                     *attaque = (AttaqueSauvegarde){
                         .idAttaque = DEFENSE,
@@ -335,7 +361,7 @@ void actionPerso(SDL_Renderer* renderer, Fighter* persoActuel, int equipeAdverse
                     if (persoActuel->pt < 10) persoActuel->pt += 1;
                     if (persoActuel->pt < 10) persoActuel->pt += 1;
                     quit = true;
-
+        
                 } else if (btnComp1.hovered && persoActuel->pt >= persoActuel->spe_atq1.cout) {
                     persoActuel->pt -= persoActuel->spe_atq1.cout;
                     *attaque = (AttaqueSauvegarde){
@@ -343,9 +369,11 @@ void actionPerso(SDL_Renderer* renderer, Fighter* persoActuel, int equipeAdverse
                         .utilisateurEquipe = get_equipe_id(id),
                         .utilisateurNum = get_fighter_num(id),
                     };
-                    *attaque = choisirCible(renderer, equipeAdverse, *attaque);
+                    int equipeCible = est_une_attaque_de_soin(attaque->idAttaque) ?
+                                      get_equipe_id(id) : equipeAdverse;
+                    *attaque = choisirCible(renderer, equipeCible, *attaque);
                     quit = true;
-
+        
                 } else if (btnComp2.hovered && persoActuel->pt >= persoActuel->spe_atq2.cout) {
                     persoActuel->pt -= persoActuel->spe_atq2.cout;
                     *attaque = (AttaqueSauvegarde){
@@ -353,9 +381,11 @@ void actionPerso(SDL_Renderer* renderer, Fighter* persoActuel, int equipeAdverse
                         .utilisateurEquipe = get_equipe_id(id),
                         .utilisateurNum = get_fighter_num(id),
                     };
-                    *attaque = choisirCible(renderer, equipeAdverse, *attaque);
+                    int equipeCible = est_une_attaque_de_soin(attaque->idAttaque) ?
+                                      get_equipe_id(id) : equipeAdverse;
+                    *attaque = choisirCible(renderer, equipeCible, *attaque);
                     quit = true;
-
+        
                 } else if (btnComp3.hovered && persoActuel->pt >= persoActuel->spe_atq3.cout) {
                     persoActuel->pt -= persoActuel->spe_atq3.cout;
                     *attaque = (AttaqueSauvegarde){
@@ -363,16 +393,20 @@ void actionPerso(SDL_Renderer* renderer, Fighter* persoActuel, int equipeAdverse
                         .utilisateurEquipe = get_equipe_id(id),
                         .utilisateurNum = get_fighter_num(id),
                     };
-                    *attaque = choisirCible(renderer, equipeAdverse, *attaque);
+                    int equipeCible = est_une_attaque_de_soin(attaque->idAttaque) ?
+                                      get_equipe_id(id) : equipeAdverse;
+                    *attaque = choisirCible(renderer, equipeCible, *attaque);
                     quit = true;
-
                 }
             }
         }
+        
 
         SDL_Delay(8);
     }
 }
+
+
 
 bool equipe_est_morte(int equipe) {
     for (int i = 0; i < 3; i++) {
@@ -381,6 +415,32 @@ bool equipe_est_morte(int equipe) {
     }
     return true;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void runGame(SDL_Renderer* rendu) {
     arreter_musique("ressource/musique/ogg/selection_personnages.ogg");
@@ -399,8 +459,26 @@ void runGame(SDL_Renderer* rendu) {
     partieActuelle.tour = 1;
     partieActuelle.equipeQuiCommence = rand() % 2 + 1;
     partieActuelle.fin = false;
-    partieActuelle.mapType = 3;
-    jouerMusique("ressource/musique/mp3/combat_6.mp3", 20);
+    partieActuelle.mapType = 9;
+
+    partieActuelle.mapType = rand()%9;
+    char musiquePath[128];
+    snprintf(musiquePath, sizeof(musiquePath), "ressource/musique/ogg/jeu/combat_%d.ogg", partieActuelle.mapType);
+
+    switch (partieActuelle.mapType){
+    case 0:     ecartementPont = -25;    break;
+    case 1:     ecartementPont = 20;    break;
+    case 2:     ecartementPont = -25;    break;
+    case 3:     ecartementPont = -10;    break;
+    case 4:     ecartementPont = -20;    break;
+    case 5:     ecartementPont = 10;    break;
+    case 6:     ecartementPont = -20;    break;
+    case 7:     ecartementPont = 70;    break;
+    case 8:     ecartementPont = -50;    break;    
+    default:
+        break;
+    }
+    jouerMusique(musiquePath, 20);
     for (int i = 0; i < NB_PERSOS_EQUIPE * 2; i++) {
         tableauAttaqueDuTour[i] = (AttaqueSauvegarde){ .idAttaque = -1 };
     }
@@ -411,6 +489,8 @@ void runGame(SDL_Renderer* rendu) {
         animationNouveauTour(rendu, partieActuelle.tour);
 
         int equipeDebut = (partieActuelle.tour % 2 == 0) ? partieActuelle.equipeQuiCommence : 3 - partieActuelle.equipeQuiCommence;
+
+
 
         // Tour de la première équipe
         for (int i = 0; i < 3; i++) {
@@ -492,6 +572,6 @@ void runGame(SDL_Renderer* rendu) {
         partieActuelle.tour++;
     }
 
-    SDL_Log("Fin du jeu ! Merci d'avoir joué.");
+    SDL_Log("\n\n_______Fin du jeu ! Merci d'avoir joué._______\n\n");
     exit(0);
 }

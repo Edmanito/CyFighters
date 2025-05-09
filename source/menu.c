@@ -8,7 +8,7 @@
 #include "langue.h"
 
 
-int volume_global = 64; // entre 0 et 128
+int volume_global = 20; // entre 0 et 128
 int musique_actuelle = 1; // 1, 2 ou 3
 
 
@@ -992,19 +992,25 @@ Page afficher_selec_difficulte(SDL_Renderer* rendu) {
                 // Clic sur "Facile"
                 if (x >= boutons[0].x && x <= boutons[0].x + boutons[0].w &&
                     y >= boutons[0].y && y <= boutons[0].y + boutons[0].h) {
-                    return PAGE_SELECTION_PERSO;
+                  
+                        partieActuelle.iaDifficulte=1;
+                        return PAGE_SELECTION_PERSO;
                 }
         
                 // Clic sur "Moyen"
                 if (x >= boutons[1].x && x <= boutons[1].x + boutons[1].w &&
                     y >= boutons[1].y && y <= boutons[1].y + boutons[1].h) {
-                    return PAGE_SELECTION_PERSO;
+                  
+                        partieActuelle.iaDifficulte=2;
+                        return PAGE_SELECTION_PERSO;
                 }
         
                 // Clic sur "Difficile"
                 if (x >= boutons[2].x && x <= boutons[2].x + boutons[2].w &&
                     y >= boutons[2].y && y <= boutons[2].y + boutons[2].h) {
-                    return PAGE_SELECTION_PERSO;
+                    
+                        partieActuelle.iaDifficulte=3;
+                        return PAGE_SELECTION_PERSO;
                 }
         
             }

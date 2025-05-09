@@ -111,7 +111,7 @@ void renduJeu(SDL_Renderer* rendu) {
     // === ÉQUIPE 1 ===
     for (int i = 0; i < 3; i++) {
         int x = 100 + i * (largeur_perso + espacement);
-        int y = y_perso + i * 30 + ECARTEMENT_PONT;
+        int y = y_perso + i * 30 + ecartementPont;
         SDL_Rect dest = {x, y, largeur_perso, hauteur_perso};
     
         char path[128];
@@ -157,7 +157,7 @@ void renduJeu(SDL_Renderer* rendu) {
     // === ÉQUIPE 2 ===
     for (int i = 0; i < 3; i++) {
         int x = LARGEUR_FENETRE - 100 - largeur_perso - i * (largeur_perso + espacement);
-        int y = y_perso + i * 30 + ECARTEMENT_PONT;
+        int y = y_perso + i * 30 + ecartementPont;
         SDL_Rect dest = {x, y, largeur_perso, hauteur_perso};
     
         char path[128];
@@ -269,12 +269,12 @@ SDL_Rect get_rect_fighter(Fighter* fighter) {
     for (int i = 0; i < 3; i++) {
         if (fighter == &partieActuelle.joueur1.fighter1 + i) {
             int x = 100 + i * (largeur + espacement);
-            int y = y_perso + i * 30 + ECARTEMENT_PONT;
+            int y = y_perso + i * 30 + ecartementPont;
             return (SDL_Rect){x, y, largeur, hauteur};
         }
         if (fighter == &partieActuelle.joueur2.fighter1 + i) {
             int x = LARGEUR_FENETRE - 100 - largeur - i * (largeur + espacement);
-            int y = y_perso + i * 30 + ECARTEMENT_PONT;
+            int y = y_perso + i * 30 + ecartementPont;
             return (SDL_Rect){x, y, largeur, hauteur};
         }
     }

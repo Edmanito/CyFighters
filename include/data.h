@@ -92,6 +92,7 @@ typedef struct {
     bool fin;
     int mapType;
     bool nuit;
+    int iaDifficulte;
 } Partie;
 
 typedef struct {

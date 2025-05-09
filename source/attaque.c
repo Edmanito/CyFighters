@@ -65,244 +65,231 @@ FonctionAttaque fonctions_attaques[NB_ATTAQUES_TOTAL] = {
     [ATQ_RUGISSEMENT_D_ACIER]   = attaque_rugissement_d_acier
 };
 
-
 // Effet de soin
+
 void soin_effet(Fighter* lanceur, Fighter* cible, int quantite) {
     int avant = cible->actu_pv;
     int apres = avant + quantite;
-
-    if (apres > cible->max_pv)
-        apres = cible->max_pv;
-
+    if (apres > cible->max_pv) apres = cible->max_pv;
     cible->actu_pv = apres;
-
-    printf("%s soigne %s (+%d PV)\n", lanceur->nom, cible->nom, apres - avant);
+    printf("%s utilise Soin sur %s (+%d PV)\n", lanceur->nom, cible->nom, apres - avant);
+    SDL_Log("[DEBUG] Appel de : soin_effet");
 }
 
 void defense(Fighter* attaquant, Fighter* cible) {
-    SDL_Log("attaque_affutage_mortal");
+    SDL_Log("[DEBUG] Appel de : defense");
 }
-
-//structure avec le nom de l'effet et un cool down
 
 void attaqueClassique(Fighter* attaquant, Fighter* cible) {
     Fighter a = appliquer_modificateurs(attaquant);
     Fighter c = appliquer_modificateurs(cible);
-
     int degats = a.attaque * 2 - c.defense;
     if (degats < 10) degats = 10;
-
     cible->actu_pv -= degats;
     if (cible->actu_pv < 0) cible->actu_pv = 0;
     if (cible->pt < 10) cible->pt++;
-
-    printf("%s attaque %s (-%d PV)\n", a.nom, c.nom, degats);
-    SDL_Log("attaqueClassique");
+    printf("%s utilise Attaque Classique sur %s (-%d PV)\n", a.nom, c.nom, degats);
+    SDL_Log("[DEBUG] Appel de : attaqueClassique");
 }
 
 void attaque_affutage_mortal(Fighter* attaquant, Fighter* cible) {
-    attaquant->statutEffet = 1; // Saignement
-    SDL_Log("attaque_affutage_mortal");
+    attaquant->statutEffet = 1;
+    printf("%s applique l'effet Saignement\n", attaquant->nom);
+    SDL_Log("[DEBUG] Appel de : attaque_affutage_mortal");
 }
 
 void attaque_assaut_tranchant(Fighter* attaquant, Fighter* cible) {
     Fighter a = appliquer_modificateurs(attaquant);
     Fighter c = appliquer_modificateurs(cible);
-
     int degats = (a.attaque * 0.6) * 2 - c.defense;
     if (degats < 10) degats = 10;
-
     cible->actu_pv -= degats * 2;
     if (cible->actu_pv < 0) cible->actu_pv = 0;
     if (cible->pt < 10) cible->pt++;
-
-    SDL_Log("attaque_assaut_tranchant");
-    printf("%s attaque %s (-%d PV)\n", a.nom, c.nom, degats * 2);
+    printf("%s utilise Assaut Tranchant sur %s (-%d PV)\n", a.nom, c.nom, degats * 2);
+    SDL_Log("[DEBUG] Appel de : attaque_assaut_tranchant");
 }
 
 void attaque_eveil_du_sabre(Fighter* attaquant, Fighter* cible) {
-    attaquant->statutEffet = 4; // Boost attaque
-    SDL_Log("attaque_eveil_du_sabre");
+    attaquant->statutEffet = 4;
+    printf("%s augmente son attaque (Éveil du Sabre)\n", attaquant->nom);
+    SDL_Log("[DEBUG] Appel de : attaque_eveil_du_sabre");
 }
+
 
 void attaque_flammes_solaires(Fighter* attaquant, Fighter* cible) {
     partieActuelle.nuit = false;
-    SDL_Log("attaque_flammes_solaires");
+    printf("%s invoque le jour (Flammes Solaires)\n", attaquant->nom);
+    SDL_Log("[DEBUG] Appel de : attaque_flammes_solaires");
 }
 
 void attaque_explosion_ardente(Fighter* attaquant, Fighter* cible) {
     Fighter a = appliquer_modificateurs(attaquant);
     Fighter c = appliquer_modificateurs(cible);
-
-    attaquant->statutEffet = 2; // Brûlure
+    attaquant->statutEffet = 2;
     int degats = a.magie * 2 - c.magie;
     if (degats < 10) degats = 10;
-
     cible->actu_pv -= degats;
     if (cible->actu_pv < 0) cible->actu_pv = 0;
     if (cible->pt < 10) cible->pt++;
-
-    SDL_Log("attaque_explosion_ardente");
-    printf("%s attaque %s (-%d PV)\n", a.nom, c.nom, degats);
+    printf("%s utilise Explosion Ardente sur %s (-%d PV)\n", a.nom, c.nom, degats);
+    SDL_Log("[DEBUG] Appel de : attaque_explosion_ardente");
 }
 
 void attaque_esprit_flamboyant(Fighter* attaquant, Fighter* cible) {
-    attaquant->statutEffet = 4; // Boost attaque
-    SDL_Log("attaque_esprit_flamboyant");
+    attaquant->statutEffet = 4;
+    printf("%s augmente son attaque (Esprit Flamboyant)\n", attaquant->nom);
+    SDL_Log("[DEBUG] Appel de : attaque_esprit_flamboyant");
 }
 
 void attaque_prison_de_givre(Fighter* attaquant, Fighter* cible) {
-    cible->statutEffet = 11; // Gel
-    SDL_Log("attaque_prison_de_givre");
+    cible->statutEffet = 11;
+    printf("%s gèle %s (Prison de Givre)\n", attaquant->nom, cible->nom);
+    SDL_Log("[DEBUG] Appel de : attaque_prison_de_givre");
 }
 
 void attaque_blizzard(Fighter* attaquant, Fighter* cible) {
     Fighter a = appliquer_modificateurs(attaquant);
     Fighter c = appliquer_modificateurs(cible);
-
-    cible->statutEffet = 11; // Gel
+    cible->statutEffet = 11;
     int degats = (a.attaque * 0.3) * 2 - c.defense;
     if (degats < 10) degats = 10;
-
     cible->actu_pv -= degats;
     if (cible->actu_pv < 0) cible->actu_pv = 0;
     if (cible->pt < 10) cible->pt++;
-
-    SDL_Log("attaque_blizzard");
-    printf("%s attaque %s (-%d PV)\n", a.nom, c.nom, degats);
+    printf("%s utilise Blizzard sur %s (-%d PV + Gel)\n", a.nom, c.nom, degats);
+    SDL_Log("[DEBUG] Appel de : attaque_blizzard");
 }
 
 void attaque_glace_curative(Fighter* attaquant, Fighter* cible) {
     int gain = cible->max_pv * 0.2;
     soin_effet(attaquant, cible, gain);
+    SDL_Log("[DEBUG] Appel de : attaque_glace_curative");
 }
 
 void attaque_lien_de_sang(Fighter* attaquant, Fighter* cible) {
     attaquant->statutEffet = 12;
     cible->statutEffet = 12;
-    SDL_Log("attaque_lien_de_sang");
+    printf("%s crée un Lien de Sang avec %s\n", attaquant->nom, cible->nom);
+    SDL_Log("[DEBUG] Appel de : attaque_lien_de_sang");
 }
+
 
 void attaque_vague_guerisseuse(Fighter* attaquant, Fighter* cible) {
     int gain = cible->max_pv * 0.2;
     soin_effet(attaquant, cible, gain);
+    SDL_Log("[DEBUG] Appel de : attaque_vague_guerisseuse");
 }
 
 void attaque_eveil_lunaire(Fighter* attaquant, Fighter* cible) {
     partieActuelle.nuit = true;
-    SDL_Log("attaque_eveil_lunaire");
+    printf("%s invoque la nuit (Éveil Lunaire)\n", attaquant->nom);
+    SDL_Log("[DEBUG] Appel de : attaque_eveil_lunaire");
 }
 
 void attaque_crepuscule(Fighter* attaquant, Fighter* cible) {
     partieActuelle.nuit = true;
-    SDL_Log("attaque_crepuscule");
+    printf("%s plonge le combat dans le Crépuscule\n", attaquant->nom);
+    SDL_Log("[DEBUG] Appel de : attaque_crepuscule");
 }
 
 void attaque_hurlement_noir(Fighter* attaquant, Fighter* cible) {
     Fighter a = appliquer_modificateurs(attaquant);
     Fighter c = appliquer_modificateurs(cible);
-
     int degats = (a.magie * 0.7) * 2 - c.magie;
     if (degats < 10) degats = 10;
-
     cible->actu_pv -= degats;
     if (cible->actu_pv < 0) cible->actu_pv = 0;
     if (cible->pt < 10) cible->pt++;
-
-    SDL_Log("attaque_hurlement_noir");
-    printf("%s attaque %s (-%d PV)\n", a.nom, c.nom, degats);
+    printf("%s utilise Hurlement Noir sur %s (-%d PV)\n", a.nom, c.nom, degats);
+    SDL_Log("[DEBUG] Appel de : attaque_hurlement_noir");
 }
 
 void attaque_brume_protectrice(Fighter* attaquant, Fighter* cible) {
-    cible->statutEffet = 3; // Boost défense
-    SDL_Log("attaque_brume_protectrice");
+    cible->statutEffet = 3;
+    printf("%s augmente la défense de %s (Brume Protectrice)\n", attaquant->nom, cible->nom);
+    SDL_Log("[DEBUG] Appel de : attaque_brume_protectrice");
 }
 
 void attaque_danse_du_vent(Fighter* attaquant, Fighter* cible) {
-    cible->statutEffet = 7; // Nerf attaque
-    SDL_Log("attaque_danse_du_vent");
+    cible->statutEffet = 7;
+    printf("%s affaiblit l’attaque de %s (Danse du Vent)\n", attaquant->nom, cible->nom);
+    SDL_Log("[DEBUG] Appel de : attaque_danse_du_vent");
 }
 
 void attaque_vent_percant(Fighter* attaquant, Fighter* cible) {
     Fighter a = appliquer_modificateurs(attaquant);
     Fighter c = appliquer_modificateurs(cible);
-
     int degats = (a.magie * 0.7) * 2 - c.magie;
     if (degats < 10) degats = 10;
-
     cible->actu_pv -= degats;
     if (cible->actu_pv < 0) cible->actu_pv = 0;
     if (cible->pt < 10) cible->pt++;
-
-    SDL_Log("attaque_vent_percant");
-    printf("%s attaque %s (-%d PV)\n", a.nom, c.nom, degats);
+    printf("%s utilise Vent Perçant sur %s (-%d PV)\n", a.nom, c.nom, degats);
+    SDL_Log("[DEBUG] Appel de : attaque_vent_percant");
 }
 
 void attaque_souffle_de_vie(Fighter* attaquant, Fighter* cible) {
     int gain = cible->max_pv * 0.2;
     soin_effet(attaquant, cible, gain);
+    SDL_Log("[DEBUG] Appel de : attaque_souffle_de_vie");
 }
 
 void attaque_fulgurance(Fighter* attaquant, Fighter* cible) {
     Fighter a = appliquer_modificateurs(attaquant);
     Fighter c = appliquer_modificateurs(cible);
-
     int degats = a.attaque * 2 - c.defense * 0.5;
     if (degats < 10) degats = 10;
-
     cible->actu_pv -= degats;
     if (cible->actu_pv < 0) cible->actu_pv = 0;
     if (cible->pt < 10) cible->pt++;
-
-    SDL_Log("attaque_fulgurance");
-    printf("%s attaque %s (-%d PV)\n", a.nom, c.nom, degats);
+    printf("%s utilise Fulgurance sur %s (-%d PV)\n", a.nom, c.nom, degats);
+    SDL_Log("[DEBUG] Appel de : attaque_fulgurance");
 }
 
 void attaque_foudre_enchainee(Fighter* attaquant, Fighter* cible) {
     Fighter a = appliquer_modificateurs(attaquant);
     Fighter c = appliquer_modificateurs(cible);
-
     int degats = (a.attaque * 0.4) * 2 - c.defense;
     if (degats < 10) degats = 10;
-
     cible->actu_pv -= degats;
     if (cible->actu_pv < 0) cible->actu_pv = 0;
     if (cible->pt < 10) cible->pt++;
-
-    SDL_Log("attaque_foudre_enchainee");
-    printf("%s attaque %s (-%d PV)\n", a.nom, c.nom, degats);
+    printf("%s utilise Foudre Enchaînée sur %s (-%d PV)\n", a.nom, c.nom, degats);
+    SDL_Log("[DEBUG] Appel de : attaque_foudre_enchainee");
 }
 
 void attaque_execution_rapide(Fighter* attaquant, Fighter* cible) {
     Fighter a = appliquer_modificateurs(attaquant);
     Fighter c = appliquer_modificateurs(cible);
-
     int degats;
     if (cible->actu_pv < cible->max_pv * 0.3) {
         degats = (a.attaque * 2) * 2 - c.defense;
     } else {
         degats = (a.attaque * 0.5) * 2 - c.defense;
     }
-
     if (degats < 10) degats = 10;
     cible->actu_pv -= degats;
     if (cible->actu_pv < 0) cible->actu_pv = 0;
     if (cible->pt < 10) cible->pt++;
-
-    SDL_Log("attaque_execution_rapide");
-    printf("%s attaque %s (-%d PV)\n", a.nom, c.nom, degats);
+    printf("%s utilise Exécution Rapide sur %s (-%d PV)\n", a.nom, c.nom, degats);
+    SDL_Log("[DEBUG] Appel de : attaque_execution_rapide");
 }
 
 void attaque_mur_vivant(Fighter* attaquant, Fighter* cible) {
-    SDL_Log("attaque_mur_vivant (effet à définir)");
+    printf("%s prépare une défense absolue (Mur Vivant)\n", attaquant->nom);
+    SDL_Log("[DEBUG] Appel de : attaque_mur_vivant");
 }
 
 void attaque_barriere_de_pierre(Fighter* attaquant, Fighter* cible) {
-    attaquant->statutEffet = 3; // Boost défense
-    SDL_Log("attaque_barriere_de_pierre");
+    attaquant->statutEffet = 3;
+    printf("%s augmente sa défense (Barrière de Pierre)\n", attaquant->nom);
+    SDL_Log("[DEBUG] Appel de : attaque_barriere_de_pierre");
 }
 
 void attaque_rugissement_d_acier(Fighter* attaquant, Fighter* cible) {
-    cible->statutEffet = 3; // Boost défense
-    SDL_Log("attaque_rugissement_d_acier");
+    cible->statutEffet = 3;
+    printf("%s augmente la défense de %s (Rugissement d’Acier)\n", attaquant->nom, cible->nom);
+    SDL_Log("[DEBUG] Appel de : attaque_rugissement_d_acier");
 }
+

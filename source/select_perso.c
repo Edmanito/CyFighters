@@ -185,8 +185,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                         if (mouseX >= pos_perso.x && mouseX <= pos_perso.x + pos_perso.w &&
                             mouseY >= pos_perso.y && mouseY <= pos_perso.y + pos_perso.h) {
                             
-                            Page retour = afficher_fiche_personnage(rendu, persoChoisi[a], tour_j1 ? 1 : 2);
-                            if (retour == PAGE_SELECTION_PERSO) continue;
+                            
                             jouer_effet("ressource/musique/ogg/persoClique.ogg", 40);  // ← AJOUT ICI
 
                             if (tour_j1 && nb_selections_j1 < 3) {
@@ -341,6 +340,22 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     break;
                             }
                             
+                            //Sauvegarde des choix pour afficher la fiche
+                            Page retour = afficher_fiche_personnage(rendu, persoChoisi[a], tour_j1 ? 1 : 2);
+                            if (retour == PAGE_SELECTION_PERSO) {
+                                // Annulation de la sélection
+                                perso_disponible[i] = true;
+                                if (tour_j1 && nb_selections_j1 > 0) {
+                                    nb_selections_j1--;
+                                    selections_j1[nb_selections_j1] = NULL;
+                                } else if (!tour_j1 && nb_selections_j2 > 0) {
+                                    nb_selections_j2--;
+                                    selections_j2[nb_selections_j2] = NULL;
+                                }
+                                continue;
+                            }
+
+                            
                            
 
                             if(tour_j1) SDL_Log("Perso %d l'équipe 1 est : %s",a + 1, persoChoisi[a].nom);
@@ -349,6 +364,164 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                             index_selection[a] = i;
                             a = a + 1;
                             tour_j1 = !tour_j1;
+
+
+                            //_____________________________________IA____________________________________//
+
+                            if (partieActuelle.iaDifficulte > 0 && !tour_j1 && nb_selections_j2 < 3) {
+                                int choix = -1;
+                                do {
+                                    choix = rand() % 8;
+                                    switch(choix){
+
+                                        case 0:
+                                            strcpy(persoChoisi[a].nom,"darkshadow");
+                                            persoChoisi[a].actu_pv=darkshadow.actu_pv;
+                                            persoChoisi[a].max_pv=darkshadow.max_pv;
+                                            persoChoisi[a].attaque=darkshadow.attaque;
+                                            persoChoisi[a].defense=darkshadow.defense;
+                                            persoChoisi[a].agilite=darkshadow.agilite;
+                                            persoChoisi[a].vitesse=darkshadow.vitesse;
+                                            persoChoisi[a].element=darkshadow.element;
+                                            persoChoisi[a].spe_atq1 = crepuscule;
+                                            persoChoisi[a].spe_atq2 = hurlementNoir;
+                                            persoChoisi[a].spe_atq3 = brumeProtectrice;
+                                            index_selection[a] = i;
+                                            break;
+                                       
+                                        case 1:
+                                        
+                                            strcpy(persoChoisi[a].nom,"hitsugaya");
+                                            persoChoisi[a].actu_pv=hitsugaya.actu_pv;
+                                            persoChoisi[a].max_pv=hitsugaya.max_pv;
+                                            persoChoisi[a].attaque=hitsugaya.attaque;
+                                            persoChoisi[a].defense=hitsugaya.defense;
+                                            persoChoisi[a].agilite=hitsugaya.agilite;
+                                            persoChoisi[a].vitesse=hitsugaya.vitesse;
+                                            persoChoisi[a].element=hitsugaya.element;
+                                            persoChoisi[a].spe_atq1 = prisonDeGivre;
+                                            persoChoisi[a].spe_atq2 = blizzard;
+                                            persoChoisi[a].spe_atq3 = glaceCurative;
+                                            index_selection[a] = i;
+                                            break;
+                                        case 2:
+                                        
+                                            strcpy(persoChoisi[a].nom,"incassable");
+                                            persoChoisi[a].actu_pv=incassable.actu_pv;
+                                            persoChoisi[a].max_pv=incassable.max_pv;
+                                            persoChoisi[a].attaque=incassable.attaque;
+                                            persoChoisi[a].defense=incassable.defense;
+                                            persoChoisi[a].agilite=incassable.agilite;
+                                            persoChoisi[a].vitesse=incassable.vitesse;
+                                            persoChoisi[a].element=incassable.element;
+                                            persoChoisi[a].spe_atq1 = murVivant;
+                                            persoChoisi[a].spe_atq2 = barriereDePierre;
+                                            persoChoisi[a].spe_atq3 = rugissementDacier;
+                                            index_selection[a] = i;
+                                            break;
+                                        
+                                        case 3:
+                                            
+                                            strcpy(persoChoisi[a].nom,"katara");
+                                            persoChoisi[a].actu_pv=katara.actu_pv;
+                                            persoChoisi[a].max_pv=katara.max_pv;
+                                            persoChoisi[a].attaque=katara.attaque;
+                                            persoChoisi[a].defense=katara.defense;
+                                            persoChoisi[a].agilite=katara.agilite;
+                                            persoChoisi[a].vitesse=katara.vitesse;
+                                            persoChoisi[a].element=katara.element;
+                                            persoChoisi[a].spe_atq1 = lienDeSang;
+                                            persoChoisi[a].spe_atq2 = vagueGuerisseuse;
+                                            persoChoisi[a].spe_atq3 = eveilLunaire;
+                                            index_selection[a] = i;
+                                            break;
+                                        
+                                        case 4:
+                                        
+                                            strcpy(persoChoisi[a].nom,"kirua");
+                                            persoChoisi[a].actu_pv=kirua.actu_pv;
+                                            persoChoisi[a].max_pv=kirua.max_pv;
+                                            persoChoisi[a].attaque=kirua.attaque;
+                                            persoChoisi[a].defense=kirua.defense;
+                                            persoChoisi[a].agilite=kirua.agilite;
+                                            persoChoisi[a].vitesse=kirua.vitesse;
+                                            persoChoisi[a].element=kirua.element;
+                                            persoChoisi[a].spe_atq1 = fulgurance;
+                                            persoChoisi[a].spe_atq2 = foudreEnchainee;
+                                            persoChoisi[a].spe_atq3 = executionRapide;
+                                            index_selection[a] = i;
+                                            break;
+                                            
+                                        case 5:
+                                        
+                                            strcpy(persoChoisi[a].nom,"rengoku");
+                                            persoChoisi[a].actu_pv=rengoku.actu_pv;
+                                            persoChoisi[a].max_pv=rengoku.max_pv;
+                                            persoChoisi[a].attaque=rengoku.attaque;
+                                            persoChoisi[a].defense=rengoku.defense;
+                                            persoChoisi[a].agilite=rengoku.agilite;
+                                            persoChoisi[a].vitesse=rengoku.vitesse;
+                                            persoChoisi[a].element=rengoku.element;
+                                            persoChoisi[a].spe_atq1 = flammesSolaires;
+                                            persoChoisi[a].spe_atq2 = explosionArdente;
+                                            persoChoisi[a].spe_atq3 = espritFlamboyant;
+                                            index_selection[a] = i;
+                                            break;
+                                            
+                                        case 6:
+                                            
+                                            strcpy(persoChoisi[a].nom,"temari");
+                                            persoChoisi[a].actu_pv=temari.actu_pv;
+                                            persoChoisi[a].max_pv=temari.max_pv;
+                                            persoChoisi[a].attaque=temari.attaque;
+                                            persoChoisi[a].defense=temari.defense;
+                                            persoChoisi[a].agilite=temari.agilite;
+                                            persoChoisi[a].vitesse=temari.vitesse;
+                                            persoChoisi[a].element=temari.element;
+                                            persoChoisi[a].spe_atq1 = danseDuVent;
+                                            persoChoisi[a].spe_atq2 = ventPercant;
+                                            persoChoisi[a].spe_atq3 = souffleDeVie;
+                                            index_selection[a] = i;
+                                            break;
+                                            
+                                        case 7:
+                                        
+                                            strcpy(persoChoisi[a].nom,"zoro");
+                                            persoChoisi[a].actu_pv=zoro.actu_pv;
+                                            persoChoisi[a].max_pv=zoro.max_pv;
+                                            persoChoisi[a].attaque=zoro.attaque;
+                                            persoChoisi[a].defense=zoro.defense;
+                                            persoChoisi[a].agilite=zoro.agilite;
+                                            persoChoisi[a].vitesse=zoro.vitesse;
+                                            persoChoisi[a].element=zoro.element;
+                                            persoChoisi[a].spe_atq1 = affutageMortal;
+                                            persoChoisi[a].spe_atq2 = assautTranchant;
+                                            persoChoisi[a].spe_atq3 = eveilDuSabre;
+                                            index_selection[a] = i;
+                                            break;
+        
+                                        default :
+                                            strcpy(persoChoisi[a].nom,"lukas");
+                                            persoChoisi[a].actu_pv=lukas.actu_pv;
+                                            persoChoisi[a].max_pv=lukas.max_pv;
+                                            persoChoisi[a].attaque=lukas.attaque;
+                                            persoChoisi[a].defense=lukas.defense;
+                                            persoChoisi[a].agilite=lukas.agilite;
+                                            persoChoisi[a].vitesse=lukas.vitesse;
+                                            persoChoisi[a].element=lukas.element;
+                    
+                                            break;
+                                    }
+                                } while (!perso_disponible[choix]);
+                            
+                                perso_disponible[choix] = false;
+                            
+                                selections_j2[nb_selections_j2] = portraits[choix];
+                                nb_selections_j2++;
+                            
+                                a++;
+                                tour_j1 = !tour_j1;
+                            }                            
                             
                             break;
                         }
@@ -434,60 +607,26 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-const char* get_nom_image_depuis_index(int index) {
-    const char* noms[] = {
-        "darkshadow", "hitsugaya", "incassable", "katara",
-        "kirua", "rengoku", "temari", "zoro"
-    };
-    if (index >= 0 && index < 8) return noms[index];
-    return "inconnu";
-}
-
-
-
-
-
 Page afficher_fiche_personnage(SDL_Renderer* rendu, Fighter perso, int joueur) {
     SDL_Texture* fond = IMG_LoadTexture(rendu, "ressource/image/fonds/fond_selection_perso.png");
     SDL_Texture* bouton_retour = IMG_LoadTexture(rendu, "ressource/image/utilité/retour.png");
     SDL_Texture* bouton_avancer = IMG_LoadTexture(rendu, "ressource/image/utilité/avance.png");
 
     // Corriger le nom pour chargement de sprite
-    const char* vrai_nom = get_nom_image_depuis_index(index_selection[joueur == 1 ? 0 : 1]);
+    const char* vrai_nom = perso.nom;
     char chemin[256];
+    SDL_Log(">> Chargement de %s", perso.nom);
     snprintf(chemin, sizeof(chemin), "ressource/image/personnages_pixel/%s.png", vrai_nom);
     SDL_Texture* sprite_pixel = IMG_LoadTexture(rendu, chemin);
+
 
     SDL_Rect rect_sprite = {50, 0, 400, HAUTEUR_FENETRE};
     SDL_Rect rect_retour = {20, HAUTEUR_FENETRE - 100, 80, 80};
     SDL_Rect rect_avancer = {LARGEUR_FENETRE - 100, HAUTEUR_FENETRE - 100, 80, 80};
 
     TTF_Font* font = TTF_OpenFont("ressource/langue/police/arial.ttf", 28);
+    TTF_SetFontStyle(font, TTF_STYLE_BOLD);         // Écriture en gras
+    TTF_SetFontOutline(font,1 );                    // Épaisseur du contour
     SDL_Color noir = {0, 0, 0, 255};
 
     const char* phrases[] = {
@@ -516,12 +655,32 @@ Page afficher_fiche_personnage(SDL_Renderer* rendu, Fighter perso, int joueur) {
         SDL_RenderCopy(rendu, sprite_pixel, NULL, &rect_sprite);
 
         // Présentation
-        SDL_Surface* surf = TTF_RenderUTF8_Solid(font, presentation, noir);
-        SDL_Texture* tex = SDL_CreateTextureFromSurface(rendu, surf);
-        SDL_Rect r_pres = {500, 60, surf->w, surf->h};
-        SDL_RenderCopy(rendu, tex, NULL, &r_pres);
-        SDL_FreeSurface(surf);
-        SDL_DestroyTexture(tex);
+        // --- Texte de présentation avec contour ---
+
+        // Couleur de contour (gris foncé)
+        SDL_Color blanc  = {255, 255, 255, 255};
+        // Texte avec contour
+        TTF_SetFontOutline(font, 2);
+        SDL_Surface* surf_contour = TTF_RenderUTF8_Solid(font, presentation, blanc);
+        SDL_Texture* tex_contour = SDL_CreateTextureFromSurface(rendu, surf_contour);
+        SDL_Rect r_pres = {
+            (LARGEUR_FENETRE - surf_contour->w) / 2 + 100,      //permet de gerer la position de la phrase +100 sert a decaler les pixel vers la droite
+            60,
+            surf_contour->w,
+            surf_contour->h
+        };
+        SDL_RenderCopy(rendu, tex_contour, NULL, &r_pres);
+        SDL_FreeSurface(surf_contour);
+        SDL_DestroyTexture(tex_contour);
+
+        // Texte plein (noir par-dessus)
+        TTF_SetFontOutline(font, 0);
+        SDL_Surface* surf_plein = TTF_RenderUTF8_Solid(font, presentation, noir);
+        SDL_Texture* tex_plein = SDL_CreateTextureFromSurface(rendu, surf_plein);
+        SDL_RenderCopy(rendu, tex_plein, NULL, &r_pres);
+        SDL_FreeSurface(surf_plein);
+        SDL_DestroyTexture(tex_plein);
+
 
         // Stats
         char ligne[128];
@@ -539,12 +698,28 @@ Page afficher_fiche_personnage(SDL_Renderer* rendu, Fighter perso, int joueur) {
 
         for (int i = 0; i < 6; i++) {
             sprintf(ligne, "%s : %d", stats[i], valeurs[i]);
-            surf = TTF_RenderUTF8_Solid(font, ligne, noir);
-            tex = SDL_CreateTextureFromSurface(rendu, surf);
-            SDL_Rect rect = {500, start_y + i * step, surf->w, surf->h};
-            SDL_RenderCopy(rendu, tex, NULL, &rect);
-            SDL_FreeSurface(surf);
-            SDL_DestroyTexture(tex);
+
+            // Contour blanc
+            TTF_SetFontOutline(font, 2);
+            SDL_Surface* surf_contour = TTF_RenderUTF8_Solid(font, (const char*)ligne, (SDL_Color){255, 255, 255, 255});
+            SDL_Texture* tex_contour = SDL_CreateTextureFromSurface(rendu, surf_contour);
+            SDL_Rect rect = {
+                500,
+                start_y + i * step,
+                surf_contour->w,
+                surf_contour->h
+            };
+            SDL_RenderCopy(rendu, tex_contour, NULL, &rect);
+            SDL_FreeSurface(surf_contour);
+            SDL_DestroyTexture(tex_contour);
+
+            // Texte plein noir
+            TTF_SetFontOutline(font, 0);
+            SDL_Surface* surf_plein = TTF_RenderUTF8_Solid(font, ligne, noir);
+            SDL_Texture* tex_plein = SDL_CreateTextureFromSurface(rendu, surf_plein);
+            SDL_RenderCopy(rendu, tex_plein, NULL, &rect);
+            SDL_FreeSurface(surf_plein);
+            SDL_DestroyTexture(tex_plein);
         }
 
         SDL_RenderCopy(rendu, bouton_retour, NULL, &rect_retour);
