@@ -16,8 +16,7 @@ extern Page afficher_fiche_personnage(SDL_Renderer* rendu, Fighter perso, int jo
 Fighter persoChoisi[6];
 int index_selection[6];
 
-
-
+void cleanup(void);
 void runGame(SDL_Renderer* rendu);
 
 
@@ -501,6 +500,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                             break;
         
                                         default :
+                                            SDL_Log("Crash ce n'est pas normal");
                                             strcpy(persoChoisi[a].nom,"lukas");
                                             persoChoisi[a].actu_pv=lukas.actu_pv;
                                             persoChoisi[a].max_pv=lukas.max_pv;
@@ -607,145 +607,181 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Page afficher_fiche_personnage(SDL_Renderer* rendu, Fighter perso, int joueur) {
     SDL_Texture* fond = IMG_LoadTexture(rendu, "ressource/image/fonds/fond_selection_perso.png");
+    SDL_Texture* cadre_nom = IMG_LoadTexture(rendu, "ressource/image/cadres/cadre_titres.png");
     SDL_Texture* bouton_retour = IMG_LoadTexture(rendu, "ressource/image/utilité/retour.png");
     SDL_Texture* bouton_avancer = IMG_LoadTexture(rendu, "ressource/image/utilité/avance.png");
 
-    // Corriger le nom pour chargement de sprite
-    const char* vrai_nom = perso.nom;
     char chemin[256];
-    SDL_Log(">> Chargement de %s", perso.nom);
-    snprintf(chemin, sizeof(chemin), "ressource/image/personnages_pixel/%s.png", vrai_nom);
+    snprintf(chemin, sizeof(chemin), "ressource/image/personnages_pixel/%s.png", perso.nom);
     SDL_Texture* sprite_pixel = IMG_LoadTexture(rendu, chemin);
 
-
-    SDL_Rect rect_sprite = {50, 0, 400, HAUTEUR_FENETRE};
-    SDL_Rect rect_retour = {20, HAUTEUR_FENETRE - 100, 80, 80};
-    SDL_Rect rect_avancer = {LARGEUR_FENETRE - 100, HAUTEUR_FENETRE - 100, 80, 80};
-
     TTF_Font* font = TTF_OpenFont("ressource/langue/police/arial.ttf", 28);
-    TTF_SetFontStyle(font, TTF_STYLE_BOLD);         // Écriture en gras
-    TTF_SetFontOutline(font,1 );                    // Épaisseur du contour
+    TTF_SetFontStyle(font, TTF_STYLE_BOLD);
     SDL_Color noir = {0, 0, 0, 255};
+    SDL_Color blanc = {255, 255, 255, 255};
 
     const char* phrases[] = {
-        "zoro",        "Rien... rien du tout. Je n'ai rien à perdre.",
-        "hitsugaya",   "Je ne laisserai jamais la glace qui protège cette ville fondre.",
-        "darkshadow",  "Embrasse les ténèbres... et laisse-les te guider.",
-        "rengoku",     "Continue d'avancer. Même si tu pleures, protège les autres.",
-        "katara",      "Je suis peut-être une fille... mais une maître de l'eau.",
-        "temari",      "Seuls les faibles parlent de justice et de pitié.",
-        "kirua",       "Si tu es fort tu survis. Si tu es faible, tu meurs.",
-        "incassable",  "Tu vas voir ce que ça fait de se frotter à du diamant pur !"
+        "zoro",        "« Rien... rien du tout. Je n'ai rien à perdre. »",
+        "hitsugaya",   "« Je ne laisserai jamais la glace qui protège cette ville fondre. »",
+        "darkshadow",  "« Embrasse les ténèbres... et laisse-les te guider. »",
+        "rengoku",     "« Continue d'avancer. Même si tu pleures, protège les autres. »",
+        "katara",      "« Je suis peut-être une fille... mais une maître de l'eau. »",
+        "temari",      "« Seuls les faibles parlent de justice et de pitié. »",
+        "kirua",       "« Si tu es fort tu survis. Si tu es faible, tu meurs. »",
+        "incassable",  "« Tu vas voir ce que ça fait de se frotter à du diamant pur ! »"
     };
 
-    const char* presentation = "???";
-    for (int i = 0; i < sizeof(phrases) / sizeof(char*); i += 2) {
-        if (strcmp(vrai_nom, phrases[i]) == 0) {
+    const char* presentation = "« ??? »";
+    for (int i = 0; i < sizeof(phrases)/sizeof(char*); i += 2) {
+        if (strcmp(perso.nom, phrases[i]) == 0) {
             presentation = phrases[i + 1];
             break;
         }
     }
+
+    SDL_Rect rect_sprite = {100, 100, 300, 400};
+    SDL_Rect rect_nom = {LARGEUR_FENETRE / 2 - 150, 20, 300, 60};
+    SDL_Rect rect_retour = {20, HAUTEUR_FENETRE - 100, 80, 80};
+    SDL_Rect rect_avancer = {LARGEUR_FENETRE - 100, HAUTEUR_FENETRE - 100, 80, 80};
 
     SDL_Event e;
     while (1) {
         SDL_RenderClear(rendu);
         SDL_RenderCopy(rendu, fond, NULL, NULL);
         SDL_RenderCopy(rendu, sprite_pixel, NULL, &rect_sprite);
+        SDL_RenderCopy(rendu, cadre_nom, NULL, &rect_nom);
 
-        // Présentation
-        // --- Texte de présentation avec contour ---
-
-        // Couleur de contour (gris foncé)
-        SDL_Color blanc  = {255, 255, 255, 255};
-        // Texte avec contour
+        // --- NOM ---
         TTF_SetFontOutline(font, 2);
-        SDL_Surface* surf_contour = TTF_RenderUTF8_Solid(font, presentation, blanc);
-        SDL_Texture* tex_contour = SDL_CreateTextureFromSurface(rendu, surf_contour);
-        SDL_Rect r_pres = {
-            (LARGEUR_FENETRE - surf_contour->w) / 2 + 100,      //permet de gerer la position de la phrase +100 sert a decaler les pixel vers la droite
-            60,
-            surf_contour->w,
-            surf_contour->h
+        SDL_Surface* surf_nom_contour = TTF_RenderUTF8_Solid(font, perso.nom, blanc);
+        SDL_Texture* tex_nom_contour = SDL_CreateTextureFromSurface(rendu, surf_nom_contour);
+        SDL_Rect rect_nom_texte = {
+            rect_nom.x + (rect_nom.w - surf_nom_contour->w)/2,
+            rect_nom.y + (rect_nom.h - surf_nom_contour->h)/2,
+            surf_nom_contour->w, surf_nom_contour->h
         };
-        SDL_RenderCopy(rendu, tex_contour, NULL, &r_pres);
-        SDL_FreeSurface(surf_contour);
-        SDL_DestroyTexture(tex_contour);
+        SDL_RenderCopy(rendu, tex_nom_contour, NULL, &rect_nom_texte);
+        SDL_FreeSurface(surf_nom_contour);
+        SDL_DestroyTexture(tex_nom_contour);
 
-        // Texte plein (noir par-dessus)
         TTF_SetFontOutline(font, 0);
-        SDL_Surface* surf_plein = TTF_RenderUTF8_Solid(font, presentation, noir);
-        SDL_Texture* tex_plein = SDL_CreateTextureFromSurface(rendu, surf_plein);
-        SDL_RenderCopy(rendu, tex_plein, NULL, &r_pres);
-        SDL_FreeSurface(surf_plein);
-        SDL_DestroyTexture(tex_plein);
+        SDL_Surface* surf_nom = TTF_RenderUTF8_Solid(font, perso.nom, noir);
+        SDL_Texture* tex_nom = SDL_CreateTextureFromSurface(rendu, surf_nom);
+        SDL_RenderCopy(rendu, tex_nom, NULL, &rect_nom_texte);
+        SDL_FreeSurface(surf_nom);
+        SDL_DestroyTexture(tex_nom);
 
-
-        // Stats
-        char ligne[128];
-        const int start_y = 150;
-        const int step = 35;
-        const char* stats[] = {"PV", "Attaque", "Défense", "Agilité", "Vitesse", "Magie"};
-        int valeurs[] = {
-            perso.max_pv,
-            perso.attaque,
-            perso.defense,
-            perso.agilite,
-            perso.vitesse,
-            perso.magie
-        };
-
+        // --- STATS ---
+        const char* labels[] = {"PV", "Attaque", "Défense", "Agilité", "Vitesse", "Magie"};
+        int valeurs[] = {perso.max_pv, perso.attaque, perso.defense, perso.agilite, perso.vitesse, perso.magie};
         for (int i = 0; i < 6; i++) {
-            sprintf(ligne, "%s : %d", stats[i], valeurs[i]);
+            char buffer[64];
+            snprintf(buffer, sizeof(buffer), "%s : %d", labels[i], valeurs[i]);
 
-            // Contour blanc
-            TTF_SetFontOutline(font, 2);
-            SDL_Surface* surf_contour = TTF_RenderUTF8_Solid(font, (const char*)ligne, (SDL_Color){255, 255, 255, 255});
-            SDL_Texture* tex_contour = SDL_CreateTextureFromSurface(rendu, surf_contour);
-            SDL_Rect rect = {
-                500,
-                start_y + i * step,
-                surf_contour->w,
-                surf_contour->h
-            };
-            SDL_RenderCopy(rendu, tex_contour, NULL, &rect);
-            SDL_FreeSurface(surf_contour);
-            SDL_DestroyTexture(tex_contour);
+            SDL_Surface* s_contour = TTF_RenderUTF8_Solid(font, buffer, blanc);
+            SDL_Texture* t_contour = SDL_CreateTextureFromSurface(rendu, s_contour);
+            SDL_Rect r = {500, 120 + i * 50, s_contour->w, s_contour->h};
+            SDL_RenderCopy(rendu, t_contour, NULL, &r);
+            SDL_FreeSurface(s_contour);
+            SDL_DestroyTexture(t_contour);
 
-            // Texte plein noir
-            TTF_SetFontOutline(font, 0);
-            SDL_Surface* surf_plein = TTF_RenderUTF8_Solid(font, ligne, noir);
-            SDL_Texture* tex_plein = SDL_CreateTextureFromSurface(rendu, surf_plein);
-            SDL_RenderCopy(rendu, tex_plein, NULL, &rect);
-            SDL_FreeSurface(surf_plein);
-            SDL_DestroyTexture(tex_plein);
+            SDL_Surface* s = TTF_RenderUTF8_Solid(font, buffer, noir);
+            SDL_Texture* t = SDL_CreateTextureFromSurface(rendu, s);
+            SDL_RenderCopy(rendu, t, NULL, &r);
+            SDL_FreeSurface(s);
+            SDL_DestroyTexture(t);
         }
 
+        // --- CITATION ---
+        TTF_SetFontOutline(font, 2);
+        SDL_Surface* surf_citation_contour = TTF_RenderUTF8_Blended(font, presentation, blanc);
+        SDL_Texture* tex_citation_contour = SDL_CreateTextureFromSurface(rendu, surf_citation_contour);
+        SDL_Rect r_pres = {
+            (LARGEUR_FENETRE - surf_citation_contour->w) / 2,
+            HAUTEUR_FENETRE - 160,
+            surf_citation_contour->w,
+            surf_citation_contour->h
+        };
+        SDL_RenderCopy(rendu, tex_citation_contour, NULL, &r_pres);
+        SDL_FreeSurface(surf_citation_contour);
+        SDL_DestroyTexture(tex_citation_contour);
+
+        TTF_SetFontOutline(font, 0);
+        SDL_Surface* surf_citation = TTF_RenderUTF8_Blended(font, presentation, noir);
+        SDL_Texture* tex_citation = SDL_CreateTextureFromSurface(rendu, surf_citation);
+        SDL_RenderCopy(rendu, tex_citation, NULL, &r_pres);
+        SDL_FreeSurface(surf_citation);
+        SDL_DestroyTexture(tex_citation);
+
+        // --- BOUTONS ---
         SDL_RenderCopy(rendu, bouton_retour, NULL, &rect_retour);
         SDL_RenderCopy(rendu, bouton_avancer, NULL, &rect_avancer);
         SDL_RenderPresent(rendu);
 
         while (SDL_PollEvent(&e)) {
-            if (e.type == SDL_QUIT) return PAGE_QUITTER;
-
+            if (e.type == SDL_QUIT) goto nettoyage;
             if (e.type == SDL_MOUSEBUTTONDOWN) {
                 int x = e.button.x, y = e.button.y;
-
                 if (x >= rect_retour.x && x <= rect_retour.x + rect_retour.w &&
                     y >= rect_retour.y && y <= rect_retour.y + rect_retour.h) {
-                    return PAGE_SELECTION_PERSO;
+                    goto retour_selection;
                 }
-
                 if (x >= rect_avancer.x && x <= rect_avancer.x + rect_avancer.w &&
                     y >= rect_avancer.y && y <= rect_avancer.y + rect_avancer.h) {
-                    return PAGE_CONFIRMATION_PERSO;
+                    goto retour_confirmation;
                 }
             }
         }
     }
 
+retour_selection:
+    SDL_DestroyTexture(fond);
+    SDL_DestroyTexture(cadre_nom);
+    SDL_DestroyTexture(bouton_retour);
+    SDL_DestroyTexture(bouton_avancer);
+    SDL_DestroyTexture(sprite_pixel);
+    TTF_CloseFont(font);
     return PAGE_SELECTION_PERSO;
+
+retour_confirmation:
+    SDL_DestroyTexture(fond);
+    SDL_DestroyTexture(cadre_nom);
+    SDL_DestroyTexture(bouton_retour);
+    SDL_DestroyTexture(bouton_avancer);
+    SDL_DestroyTexture(sprite_pixel);
+    TTF_CloseFont(font);
+    return PAGE_CONFIRMATION_PERSO;
+
+nettoyage:
+    SDL_DestroyTexture(fond);
+    SDL_DestroyTexture(cadre_nom);
+    SDL_DestroyTexture(bouton_retour);
+    SDL_DestroyTexture(bouton_avancer);
+    SDL_DestroyTexture(sprite_pixel);
+    TTF_CloseFont(font);
+    return PAGE_QUITTER;
 }
 
 
@@ -764,85 +800,97 @@ Page afficher_fiche_personnage(SDL_Renderer* rendu, Fighter perso, int joueur) {
 
 
 
+ // === LIBÉRATION DES TEXTURES COMMUNES ===
+void cleanup(void) {
+    extern SDL_Texture* textures_pixel[6];
+    extern SDL_Texture* fond_texture;
+    extern SDL_Texture* btn_avancer_texture;
+    extern SDL_Texture* btn_retour_texture;
+    extern SDL_Texture* vs_texture;
+    extern SDL_Texture* cadre_texte;
+    extern TTF_Font* font_titre;
+
+    for (int i = 0; i < 6; i++) {
+        if (textures_pixel[i]) {
+            SDL_DestroyTexture(textures_pixel[i]);
+            textures_pixel[i] = NULL;
+        }
+    }
+    if (fond_texture) SDL_DestroyTexture(fond_texture), fond_texture = NULL;
+    if (btn_avancer_texture) SDL_DestroyTexture(btn_avancer_texture), btn_avancer_texture = NULL;
+    if (btn_retour_texture) SDL_DestroyTexture(btn_retour_texture), btn_retour_texture = NULL;
+    if (vs_texture) SDL_DestroyTexture(vs_texture), vs_texture = NULL;
+    if (cadre_texte) SDL_DestroyTexture(cadre_texte), cadre_texte = NULL;
+    if (font_titre) TTF_CloseFont(font_titre), font_titre = NULL;
+}
 
 
 
-
-
-
-
+SDL_Texture* textures_pixel[6] = {NULL};
+SDL_Texture* fond_texture = NULL;
+SDL_Texture* btn_avancer_texture = NULL;
+SDL_Texture* btn_retour_texture = NULL;
+SDL_Texture* vs_texture = NULL;
+SDL_Texture* cadre_texte = NULL;
+TTF_Font* font_titre = NULL;
 
 
 
 
 Page afficher_confirmation_perso(SDL_Renderer* rendu, SDL_Texture* equipe1[3], SDL_Texture* equipe2[3]) {
+    
+   
+    
     SDL_Texture* fond_texture = IMG_LoadTexture(rendu, "ressource/image/fonds/fond_selection_perso.png");
     SDL_Texture* btn_avancer_texture = IMG_LoadTexture(rendu, "ressource/image/utilité/avance.png");
     SDL_Texture* btn_retour_texture = IMG_LoadTexture(rendu, "ressource/image/utilité/retour.png");
     SDL_Texture* vs_texture = IMG_LoadTexture(rendu, "ressource/image/utilité/versus_recap.png");
-
-    if (!fond_texture || !btn_avancer_texture || !btn_retour_texture || !vs_texture) {
-        if (fond_texture) SDL_DestroyTexture(fond_texture);
-        if (btn_avancer_texture) SDL_DestroyTexture(btn_avancer_texture);
-        if (btn_retour_texture) SDL_DestroyTexture(btn_retour_texture);
-        if (vs_texture) SDL_DestroyTexture(vs_texture);
-        return PAGE_QUITTER;
-    }
+    SDL_Texture* cadre_texte = IMG_LoadTexture(rendu, "ressource/image/cadres/cadre_texte.png");
 
     SDL_Texture* textures_pixel[6] = {NULL};
+    TTF_Font* font_titre = TTF_OpenFont("ressource/langue/police/arial.ttf", 36);
+    SDL_Color blanc = {255, 255, 255, 255};
 
-    // Chargement des textures pixelisées selon l'ordre de sélection (J1-J2 alterné)
+    // --- Vérification des chargements ---
+    if (!fond_texture || !btn_avancer_texture || !btn_retour_texture || !vs_texture || !cadre_texte || !font_titre) goto quitter;
+
     for (int i = 0; i < 3; i++) {
-        // Joueur 1 : index pair (0, 2, 4)
-        int idx_j1 = i * 2;
+        int idx_j1 = i * 2, idx_j2 = i * 2 + 1;
+
         if (idx_j1 < 6) {
             char chemin[256];
             snprintf(chemin, sizeof(chemin), "ressource/image/personnages_pixel/%s.png", persoChoisi[idx_j1].nom);
             textures_pixel[i] = IMG_LoadTexture(rendu, chemin);
-            if (!textures_pixel[i]) {
-                SDL_Log("Erreur chargement image %s : %s", chemin, SDL_GetError());
-            }
         }
-
-        // Joueur 2 : index impair (1, 3, 5)
-        int idx_j2 = i * 2 + 1;
         if (idx_j2 < 6) {
             char chemin[256];
             snprintf(chemin, sizeof(chemin), "ressource/image/personnages_pixel/%s_reverse.png", persoChoisi[idx_j2].nom);
             textures_pixel[i + 3] = IMG_LoadTexture(rendu, chemin);
-            if (!textures_pixel[i + 3]) {
-                SDL_Log("Erreur chargement image %s : %s", chemin, SDL_GetError());
-            }
         }
     }
 
     const SDL_Rect btn_retour_rect = {20, HAUTEUR_FENETRE - 100, 80, 80};
     const SDL_Rect btn_avancer_rect = {LARGEUR_FENETRE - 100, HAUTEUR_FENETRE - 100, 80, 80};
-    const SDL_Rect vs_rect = {LARGEUR_FENETRE / 2 - 40, HAUTEUR_FENETRE / 2 - 40, 200, 200};
+    const SDL_Rect vs_rect = {(LARGEUR_FENETRE - 200) / 2, (HAUTEUR_FENETRE - 200) / 2, 200, 200};
 
-    const int largeur_perso = 150;
-    const int hauteur_perso = 150;
-    const int marge_haut = 100;
-    const int espacement = 30;
-    const int start_x_j1 = 100;
-    const int start_x_j2 = LARGEUR_FENETRE - 100 - largeur_perso;
+    const int largeur_perso = 150, hauteur_perso = 150;
+    const int marge_haut = 130, espacement = 30;
+    const int start_x_j1 = 100, start_x_j2 = LARGEUR_FENETRE - 100 - largeur_perso;
 
-    bool running = true;
     SDL_Event event;
+    bool running = true;
 
     while (running) {
         while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) {
-                running = false;
-                return PAGE_QUITTER;
-            } else if (event.type == SDL_MOUSEBUTTONDOWN) {
+            if (event.type == SDL_QUIT) goto quitter;
+            if (event.type == SDL_MOUSEBUTTONDOWN) {
                 SDL_Point mouse = {event.button.x, event.button.y};
                 if (SDL_PointInRect(&mouse, &btn_avancer_rect)) {
-                    running = false;
+                    cleanup();
                     runGame(rendu);
                     return PAGE_COMBAT;
                 } else if (SDL_PointInRect(&mouse, &btn_retour_rect)) {
-                    running = false;
+                    cleanup();
                     return PAGE_SELECTION_PERSO;
                 }
             }
@@ -852,45 +900,47 @@ Page afficher_confirmation_perso(SDL_Renderer* rendu, SDL_Texture* equipe1[3], S
         SDL_RenderCopy(rendu, fond_texture, NULL, NULL);
 
         for (int i = 0; i < 3; i++) {
-            // Joueur 1
             if (textures_pixel[i]) {
-                SDL_Rect dest1 = {
-                    start_x_j1,
-                    marge_haut + i * (hauteur_perso + espacement),
-                    largeur_perso,
-                    hauteur_perso
-                };
+                SDL_Rect dest1 = {start_x_j1, marge_haut + i * (hauteur_perso + espacement), largeur_perso, hauteur_perso};
                 SDL_RenderCopy(rendu, textures_pixel[i], NULL, &dest1);
             }
-
-            // Joueur 2
             if (textures_pixel[i + 3]) {
-                SDL_Rect dest2 = {
-                    start_x_j2,
-                    marge_haut + i * (hauteur_perso + espacement),
-                    largeur_perso,
-                    hauteur_perso
-                };
+                SDL_Rect dest2 = {start_x_j2, marge_haut + i * (hauteur_perso + espacement), largeur_perso, hauteur_perso};
                 SDL_RenderCopy(rendu, textures_pixel[i + 3], NULL, &dest2);
             }
         }
 
-        SDL_RenderCopy(rendu, btn_retour_texture, NULL, &btn_retour_rect);
-        SDL_RenderCopy(rendu, vs_texture, NULL, &vs_rect);
-        SDL_RenderCopy(rendu, btn_avancer_texture, NULL, &btn_avancer_rect);
+        // --- Titres équipes ---
+        const char* label_gauche = "Équipe 1";
+        const char* label_droite = "Équipe 2";
+        SDL_Surface* surf_eq1 = TTF_RenderUTF8_Blended(font_titre, label_gauche, blanc);
+        SDL_Surface* surf_eq2 = TTF_RenderUTF8_Blended(font_titre, label_droite, blanc);
+        SDL_Texture* tex_eq1 = SDL_CreateTextureFromSurface(rendu, surf_eq1);
+        SDL_Texture* tex_eq2 = SDL_CreateTextureFromSurface(rendu, surf_eq2);
 
+        SDL_Rect cadre_eq1 = {start_x_j1 + largeur_perso / 2 - (surf_eq1->w + 40) / 2, marge_haut - 70, surf_eq1->w + 40, surf_eq1->h + 30};
+        SDL_Rect cadre_eq2 = {start_x_j2 + largeur_perso / 2 - (surf_eq2->w + 40) / 2, marge_haut - 70, surf_eq2->w + 40, surf_eq2->h + 30};
+        SDL_Rect texte_eq1 = {cadre_eq1.x + (cadre_eq1.w - surf_eq1->w) / 2, cadre_eq1.y + (cadre_eq1.h - surf_eq1->h) / 2, surf_eq1->w, surf_eq1->h};
+        SDL_Rect texte_eq2 = {cadre_eq2.x + (cadre_eq2.w - surf_eq2->w) / 2, cadre_eq2.y + (cadre_eq2.h - surf_eq2->h) / 2, surf_eq2->w, surf_eq2->h};
+
+        SDL_RenderCopy(rendu, cadre_texte, NULL, &cadre_eq1);
+        SDL_RenderCopy(rendu, cadre_texte, NULL, &cadre_eq2);
+        SDL_RenderCopy(rendu, tex_eq1, NULL, &texte_eq1);
+        SDL_RenderCopy(rendu, tex_eq2, NULL, &texte_eq2);
+
+        SDL_FreeSurface(surf_eq1); SDL_DestroyTexture(tex_eq1);
+        SDL_FreeSurface(surf_eq2); SDL_DestroyTexture(tex_eq2);
+
+        SDL_RenderCopy(rendu, vs_texture, NULL, &vs_rect);
+        SDL_RenderCopy(rendu, btn_retour_texture, NULL, &btn_retour_rect);
+        SDL_RenderCopy(rendu, btn_avancer_texture, NULL, &btn_avancer_rect);
         SDL_RenderPresent(rendu);
     }
 
-    for (int i = 0; i < 6; i++) {
-        if (textures_pixel[i]) SDL_DestroyTexture(textures_pixel[i]);
-    }
-
-    SDL_DestroyTexture(fond_texture);
-    SDL_DestroyTexture(btn_avancer_texture);
-    SDL_DestroyTexture(btn_retour_texture);
-    SDL_DestroyTexture(vs_texture);
-
-    return PAGE_CONFIRMATION_PERSO;
+quitter:
+    cleanup();
+    return PAGE_QUITTER;
 }
+
+
 

@@ -30,6 +30,8 @@ extern int musique_lancee;
 extern int perso_choisi;
 extern Mix_Music* musique_global;
 extern int ecartementPont;
+extern TTF_Font* policePrincipale;
+extern TTF_Font* policePetite;
 
 // === Fonctions d'affichage des pages ===
 Page afficher_chargement(SDL_Renderer* rendu);
@@ -51,7 +53,18 @@ void jouerAnimationAttaque(SDL_Renderer* renderer, int type, SDL_Rect lanceur, S
 // === Utilitaires interface ===
 void jouer_musique(const char* chemin, int volume);
 void charger_langue(const char* chemin);
+
+void charger_polices();
+void liberer_polices();
+
+void liberer_texte(SDL_Texture* texture);
+
 SDL_Texture* generer_texte(SDL_Renderer* rendu, const char* texte, TTF_Font* police);
 SDL_Texture* generer_texte_couleur(SDL_Renderer* rendu, const char* texte, TTF_Font* police, SDL_Color couleur);
+
+
+
+bool equipe_est_morte(int equipe);
+
 
 #endif // INTERFACE_H

@@ -95,6 +95,7 @@ typedef struct {
     int iaDifficulte;
 } Partie;
 
+
 typedef struct {
     int bonus_attaque;
     int bonus_defense;
@@ -105,8 +106,11 @@ typedef struct {
 
 typedef struct {
     int idAttaque;
-    int utilisateurNum, utilisateurEquipe;
-    int cibleNum, cibleEquipe;
+    int utilisateurNum; 
+    int utilisateurEquipe;
+    
+    int cibleNum; 
+    int cibleEquipe;
 } AttaqueSauvegarde;
 
 typedef struct {
@@ -118,7 +122,7 @@ typedef struct {
 
 // === Fonctions utilitaires ===
 Fighter appliquer_modificateurs(Fighter* original);
-Fighter* get_fighter(int equipe, int numero);
+Fighter* get_fighter(int numero);
 Fighter* get_fighter_by_index(int index);
 int get_equipe_id(int index);
 int get_fighter_num(int index);

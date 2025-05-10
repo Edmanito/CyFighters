@@ -30,10 +30,12 @@ int main(int argc, char* argv[]) {
         SDL_Quit();
         return 1;
     }
+    charger_polices();  // <-- AJOUT ICI
 
     // MIXER
     if (Mix_OpenAudio(48000, MIX_DEFAULT_FORMAT, 2, 1024) != 0) {
         printf("Erreur Audio : %s\n", Mix_GetError());
+        liberer_polices();  // <-- AJOUT ICI
         TTF_Quit();
         SDL_Quit();
         return 1;
@@ -45,6 +47,7 @@ int main(int argc, char* argv[]) {
     if (!fenetre) {
         printf("Erreur fenêtre : %s\n", SDL_GetError());
         Mix_CloseAudio();
+        liberer_polices();
         TTF_Quit();
         SDL_Quit();
         return 1;
@@ -56,6 +59,7 @@ int main(int argc, char* argv[]) {
         printf("Erreur renderer : %s\n", SDL_GetError());
         SDL_DestroyWindow(fenetre);
         Mix_CloseAudio();
+        liberer_polices();
         TTF_Quit();
         SDL_Quit();
         return 1;
@@ -101,7 +105,6 @@ int main(int argc, char* argv[]) {
             }
 
             case PAGE_COMBAT:
-                jouerMusique("ressource/musique/ogg/jeu/combat_1.ogg", 20);
                 musique_menu_jouee = 0;
                 page = afficher_jeu(rendu, selections_j1, selections_j2);
                 break;
@@ -112,7 +115,6 @@ int main(int argc, char* argv[]) {
 
             case PAGE_HISTOIRE:
                 arreter_musique();
-                
                 musique_menu_jouee = 0;
                 page = afficher_histoire(rendu);
                 break;
@@ -127,7 +129,7 @@ int main(int argc, char* argv[]) {
                 break;
         }
 
-        SDL_Delay(5); // Petit délai pour éviter de trop surcharger le CPU/audio
+        SDL_Delay(5);
     }
 
     // Libération des textures
@@ -141,6 +143,7 @@ int main(int argc, char* argv[]) {
     SDL_DestroyRenderer(rendu);
     SDL_DestroyWindow(fenetre);
     Mix_CloseAudio();
+    liberer_polices();  // <-- AJOUT ICI À LA FIN
     TTF_Quit();
     SDL_Quit();
 

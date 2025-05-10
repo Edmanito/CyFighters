@@ -28,7 +28,7 @@ AttaqueSpecial useDefense = {
 AttaqueSpecial affutageMortal = {
     .nom = "affûtage mortal",
     .description = "Applique Saignement sur attaques normales pendant 3 tours.",
-    .id = ATQ_ASSAUT_TRANCHANT,
+    .id = ATQ_AFFUTAGE_MORTAL,
     .cout = 5,
     .type = 5,
 };
@@ -44,7 +44,7 @@ AttaqueSpecial assautTranchant ={
 AttaqueSpecial eveilDuSabre ={
     .nom = "éveil du sabre",
     .description = "+ 25 pourcent attaque pour 2 tours.",
-    .id = ATQ_ASSAUT_TRANCHANT,
+    .id = ATQ_EVEIL_SABRE,
     .cout = 6,
     .type = 5,
 };
@@ -52,7 +52,7 @@ AttaqueSpecial eveilDuSabre ={
 AttaqueSpecial flammesSolaires ={
     .nom = "flammes solaires",
     .description = "Change le cycle en Jour",
-    .id = ATQ_ASSAUT_TRANCHANT,
+    .id = ATQ_FLAMMES_SOLAIRES,
     .cout = 5,
     .type = 7,
 };
@@ -60,7 +60,7 @@ AttaqueSpecial flammesSolaires ={
 AttaqueSpecial explosionArdente ={
     .nom = "explosion ardente",
     .description = "150 pourcent attaque magique + Brûlure.",
-    .id = ATQ_ASSAUT_TRANCHANT,
+    .id = ATQ_EXPLOSION_ARDENTE,
     .cout = 8,
     .type = 9,
 };
@@ -68,7 +68,7 @@ AttaqueSpecial explosionArdente ={
 AttaqueSpecial espritFlamboyant ={
     .nom = "esprit flamboyant",
     .description = "Boost attaque/défense alliées +25 pourcent pour 2 tours.",
-    .id = ATQ_ASSAUT_TRANCHANT,
+    .id = ATQ_ESPRIT_FLAMBOYANT,
     .cout = 7,
     .type = 5,
 };
@@ -76,7 +76,7 @@ AttaqueSpecial espritFlamboyant ={
 AttaqueSpecial prisonDeGivre ={
     .nom = "Prison de givre",
     .description = "Gel : -30 pourcent défense/agilité d'un ennemi pour 2 tours.",
-    .id = ATQ_ASSAUT_TRANCHANT,
+    .id = ATQ_PRISON_DE_GIVRE,
     .cout = 5,
     .type = 6,
 };
@@ -84,7 +84,7 @@ AttaqueSpecial prisonDeGivre ={
 AttaqueSpecial blizzard ={
     .nom = "Blizzard",
     .description = "AoE physique (30 pourcent puissance) + 50 pourcent chance de Gel.",
-    .id = ATQ_ASSAUT_TRANCHANT,
+    .id = ATQ_BLIZZARD,
     .cout = 7,
     .type = 3,
 };
@@ -92,7 +92,7 @@ AttaqueSpecial blizzard ={
 AttaqueSpecial glaceCurative ={
     .nom = "Glace curative",
     .description = "Soigne un allié de 20 pourcent PV max.",
-    .id = ATQ_ASSAUT_TRANCHANT,
+    .id = ATQ_GLACE_CURATIVE,
     .cout = 4,
     .type = 4,
 };
@@ -100,7 +100,7 @@ AttaqueSpecial glaceCurative ={
 AttaqueSpecial lienDeSang ={
     .nom = "Lien de Sang",
     .description = "Immobilise un ennemi tant qu'il n'est pas blessé. Katara aussi.",
-    .id = ATQ_ASSAUT_TRANCHANT,
+    .id = ATQ_LIEN_DE_SANG,
     .cout = 6,
     .type = 6,
 };
@@ -108,7 +108,7 @@ AttaqueSpecial lienDeSang ={
 AttaqueSpecial vagueGuerisseuse ={
     .nom = "Vague guérisseuse",
     .description = "Restaure 20 pourcent PV max à un allié.",
-    .id = ATQ_ASSAUT_TRANCHANT,
+    .id = ATQ_VAGUE_GUERISSEUSE,
     .cout = 4,
     .type = 4,
 };
@@ -116,7 +116,7 @@ AttaqueSpecial vagueGuerisseuse ={
 AttaqueSpecial eveilLunaire ={
     .nom = "Éveil lunaire",
     .description = "Change le cycle en Nuit",
-    .id = ATQ_ASSAUT_TRANCHANT,
+    .id = ATQ_EVEIL_LUNAIRE,
     .cout = 5,
     .type = 8,
 };
@@ -124,7 +124,7 @@ AttaqueSpecial eveilLunaire ={
 AttaqueSpecial crepuscule ={
     .nom = "Éveil lunaire",
     .description = "Change le cycle en Nuit",
-    .id = ATQ_ASSAUT_TRANCHANT,
+    .id = ATQ_CREPUSCULE,
     .cout = 5,
     .type = 8,
 };
@@ -132,7 +132,7 @@ AttaqueSpecial crepuscule ={
 AttaqueSpecial hurlementNoir ={
     .nom = "Hurlement noir",
     .description = "AoE magique (70 pourcent magie).",
-    .id = ATQ_ASSAUT_TRANCHANT,
+    .id = ATQ_HURLEMENT_NOIR,
     .cout = 6,
     .type = 3,
 };
@@ -140,7 +140,7 @@ AttaqueSpecial hurlementNoir ={
 AttaqueSpecial brumeProtectrice ={
     .nom = "Brume protectrice",
     .description = "Protège un allié (réduction dégâts -30 pourcent, 2 tours).",
-    .id = ATQ_ASSAUT_TRANCHANT,
+    .id = ATQ_BRUME_PROTECTRICE,
     .cout = 4,
     .type = 5,
 };
@@ -149,7 +149,7 @@ AttaqueSpecial brumeProtectrice ={
 AttaqueSpecial danseDuVent ={
     .nom = "Danse du vent",
     .description = "Réduit l'attaque ennemie de 25 pourcent pour 2 tours.",
-    .id = ATQ_ASSAUT_TRANCHANT,
+    .id = ATQ_DANSE_DU_VENT,
     .cout = 5,
     .type = 6,
 };
@@ -157,7 +157,7 @@ AttaqueSpecial danseDuVent ={
 AttaqueSpecial ventPercant ={
     .nom = "Vent perçant",
     .description = "AoE magique (70 pourcent magie)",
-    .id = ATQ_ASSAUT_TRANCHANT,
+    .id = ATQ_VENT_PERCANT,
     .cout = 5,
     .type = 3,
 };
@@ -165,7 +165,7 @@ AttaqueSpecial ventPercant ={
 AttaqueSpecial souffleDeVie ={
     .nom = "Souffle de vie",
     .description = "Restaure 20 pourcent PV max à un allié.",
-    .id = ATQ_ASSAUT_TRANCHANT,
+    .id = ATQ_SOUFFLE_DE_VIE,
     .cout = 4,
     .type = 4,
 };
@@ -173,7 +173,7 @@ AttaqueSpecial souffleDeVie ={
 AttaqueSpecial fulgurance ={
     .nom = "Fulgurance",
     .description = "Ignore 50 pourcent de la défense sur l'attaque.",
-    .id = ATQ_ASSAUT_TRANCHANT,
+    .id = ATQ_FULGURANCE,
     .cout = 5,
     .type = 9,
 };
@@ -181,7 +181,7 @@ AttaqueSpecial fulgurance ={
 AttaqueSpecial foudreEnchainee ={
     .nom = "Foudre enchaînée",
     .description = "AoE physique (40 pourcent attaque)",
-    .id = ATQ_ASSAUT_TRANCHANT,
+    .id = ATQ_FOUDRE_ENCHAINEE,
     .cout = 6,
     .type = 3,
 };
@@ -189,7 +189,7 @@ AttaqueSpecial foudreEnchainee ={
 AttaqueSpecial executionRapide ={
     .nom = "Exécution rapide",
     .description = "Inflige 200 pourcent attaque si cible <30 pourcent PV.",
-    .id = ATQ_ASSAUT_TRANCHANT,
+    .id = ATQ_EXECUTION_RAPIDE,
     .cout = 7,
     .type = 9,
 };
@@ -197,7 +197,7 @@ AttaqueSpecial executionRapide ={
 AttaqueSpecial murVivant ={
     .nom = "Mur vivant",
     .description = "Protège un allié : subit 100 pourcent de ses dégâts.",
-    .id = ATQ_ASSAUT_TRANCHANT,
+    .id = ATQ_MUR_VIVANT,
     .cout = 5,
     .type = 2,
 };
@@ -205,7 +205,7 @@ AttaqueSpecial murVivant ={
 AttaqueSpecial barriereDePierre ={
     .nom = "Barrière de pierre",
     .description = "Augmente sa propre défense de 50 pourcent pour 2 tours.",
-    .id = ATQ_ASSAUT_TRANCHANT,
+    .id = ATQ_BARRIERE_DE_PIERRE,
     .cout = 4,
     .type = 5,
 };
@@ -213,7 +213,7 @@ AttaqueSpecial barriereDePierre ={
 AttaqueSpecial rugissementDacier ={
     .nom = "Rugissement d'acier",
     .description = "Boost défense alliée +25 pourcent pour 2 tours.",
-    .id = ATQ_ASSAUT_TRANCHANT,
+    .id = ATQ_RUGISSEMENT_D_ACIER,
     .cout = 5,
     .type = 5,
 };
@@ -323,6 +323,8 @@ Fighter incassable={
     .element = ELEMENT_CRISTAL,
     .pt = 0
 };
+
+
 
 Fighter lukas={
     .nom = "LoukasCocasse",

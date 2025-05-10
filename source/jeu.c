@@ -12,6 +12,7 @@
 #include <SDL2/SDL_mixer.h>
 
 int ecartementPont = 40;
+extern TTF_Font* policePetite;
 
 AttaqueSauvegarde tableauAttaqueDuTour [NB_PERSOS_EQUIPE * 2];
 
@@ -84,7 +85,17 @@ void appliquer_et_mettre_a_jour_effets(Fighter* perso) {
 }
 
 
+    int idAttaque;
+    int utilisateurNum; 
+    int utilisateurEquipe;
+    
+    int cibleNum; 
+    int cibleEquipe;
+
+
+
 AttaqueSauvegarde choisirCible(SDL_Renderer* rendu, int equipeCible, AttaqueSauvegarde attaque) {
+       
     bool choisi = false;
     SDL_Event event;
     int mx, my;
@@ -149,6 +160,9 @@ AttaqueSauvegarde choisirCible(SDL_Renderer* rendu, int equipeCible, AttaqueSauv
                         my >= zone.y && my <= zone.y + zone.h) {
                         attaque.cibleEquipe = equipeCible;
                         attaque.cibleNum = i;
+                        if(equipeCible == 2){
+                            attaque.cibleNum += 3;
+                        }
                         SDL_Log("Cible sélectionnée : perso %d de l'équipe %d", i, equipeCible);
                         choisi = true;
                     }
@@ -169,43 +183,53 @@ AttaqueSauvegarde choisirCible(SDL_Renderer* rendu, int equipeCible, AttaqueSauv
 
 
 
-
-
-
-
-
 void drawButton(SDL_Renderer* renderer, Button* btn, TTF_Font* font) {
     SDL_Color color = btn->hovered ? btn->hoverColor : btn->baseColor;
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 255);
     SDL_RenderFillRect(renderer, &btn->rect);
 
-    int fontSize = 32;
-    TTF_Font* f = TTF_OpenFont("ressource/langue/police/arial.ttf", fontSize);
-    if (!f) {
-        SDL_Log("Erreur chargement police : %s", TTF_GetError());
+    if (!font) {
+        SDL_Log("drawButton : police NULL !");
         return;
     }
 
-    SDL_Surface* surf = TTF_RenderUTF8_Blended(f, btn->text, (SDL_Color){255, 255, 255, 255});
-    while (surf && surf->w > btn->rect.w - 10 && fontSize > 10) {
-        SDL_FreeSurface(surf);
-        TTF_CloseFont(f);
-        fontSize -= 2;
-        f = TTF_OpenFont("ressource/langue/police/arial.ttf", fontSize);
-        if (!f) {
-            SDL_Log("Erreur police taille %d : %s", fontSize, TTF_GetError());
+    // Crée un font réduit si le texte dépasse le bouton
+    int fontSize = 40;  // Taille de la police par défaut
+    TTF_Font* adjustedFont = TTF_OpenFont("ressource/langue/police/arial.ttf", fontSize);
+    if (!adjustedFont) {
+        SDL_Log("Erreur ouverture police : %s", TTF_GetError());
+        return;
+    }
+
+    SDL_Surface* surf = TTF_RenderUTF8_Blended(adjustedFont, btn->text, (SDL_Color){255, 255, 255, 255});
+
+    // Ajuster la taille de la police si le texte dépasse
+    while (surf && surf->w > btn->rect.w) {
+        SDL_FreeSurface(surf);  // Libère la surface précédente
+        fontSize--;
+        TTF_CloseFont(adjustedFont); // Fermeture de la police précédente
+        adjustedFont = TTF_OpenFont("ressource/langue/police/arial.ttf", fontSize);
+        if (!adjustedFont) {
+            SDL_Log("Erreur ouverture police : %s", TTF_GetError());
             return;
         }
-        surf = TTF_RenderUTF8_Blended(f, btn->text, (SDL_Color){255, 255, 255, 255});
+        surf = TTF_RenderUTF8_Blended(adjustedFont, btn->text, (SDL_Color){255, 255, 255, 255});
     }
 
     if (!surf) {
-        SDL_Log("Erreur rendu texte : %s", TTF_GetError());
-        TTF_CloseFont(f);
+        SDL_Log("Erreur rendu texte dans drawButton : %s", TTF_GetError());
+        TTF_CloseFont(adjustedFont);  // Libération de la police en cas d'erreur
         return;
     }
 
     SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
+    if (!tex) {
+        SDL_Log("Erreur création texture bouton : %s", SDL_GetError());
+        SDL_FreeSurface(surf);  // Libération de la surface si la texture échoue
+        TTF_CloseFont(adjustedFont);  // Libération de la police
+        return;
+    }
+
     int tw, th;
     SDL_QueryTexture(tex, NULL, NULL, &tw, &th);
     SDL_Rect textRect = {
@@ -215,10 +239,16 @@ void drawButton(SDL_Renderer* renderer, Button* btn, TTF_Font* font) {
     };
 
     SDL_RenderCopy(renderer, tex, NULL, &textRect);
+
+    // Libération de la mémoire après le rendu
     SDL_DestroyTexture(tex);
     SDL_FreeSurface(surf);
-    TTF_CloseFont(f);
+    TTF_CloseFont(adjustedFont);  // Libération finale de la police
 }
+
+
+
+
 
 Fighter* get_fighter_by_index(int index) {
     switch(index) {
@@ -232,15 +262,20 @@ Fighter* get_fighter_by_index(int index) {
     }
 }
 
+/*
 int get_equipe_id(int index) {
     // Joueur 1 : index pair, Joueur 2 : index impair
     return (index % 2 == 0) ? 1 : 2;
 }
 
+//Va te faire enculer espece de gros fdp va te faire sodomiser par des ane christine rinoceros aveugle et enceinte
+
+
 int get_fighter_num(int index) {
     // Chaque joueur a les index 0/2/4 (J1) et 1/3/5 (J2)
     return index / 2; // 0 pour 0/1, 1 pour 2/3, 2 pour 4/5
 }
+*/
 
 bool isMouseOver(Button* btn, int x, int y) {
     return x >= btn->rect.x && x <= btn->rect.x + btn->rect.w &&
@@ -261,9 +296,8 @@ bool est_une_attaque_de_soin(int id) {
 
 
 void actionPerso(SDL_Renderer* renderer, Fighter* persoActuel, int equipeAdverse) {
-    TTF_Font* font = TTF_OpenFont("ressource/langue/police/arial.ttf", 32);
-    if (!font) {
-        SDL_Log("Erreur chargement police: %s", TTF_GetError());
+    if (!policePrincipale || !policePetite) {
+        SDL_Log("Police non chargée !");
         return;
     }
 
@@ -293,43 +327,38 @@ void actionPerso(SDL_Renderer* renderer, Fighter* persoActuel, int equipeAdverse
 
         renduJeu(renderer);
 
-        drawButton(renderer, &btnAttaque, font);
-        drawButton(renderer, &btnDefense, font);
-        drawButton(renderer, &btnComp1, font);
-        drawButton(renderer, &btnComp2, font);
-        drawButton(renderer, &btnComp3, font);
+        drawButton(renderer, &btnAttaque, policePrincipale);
+        drawButton(renderer, &btnDefense, policePrincipale);
+        drawButton(renderer, &btnComp1, policePrincipale);
+        drawButton(renderer, &btnComp2, policePrincipale);
+        drawButton(renderer, &btnComp3, policePrincipale);
 
         // === Coûts des compétences ===
-        TTF_Font* costFont = TTF_OpenFont("ressource/langue/police/arial.ttf", 22);
-        if (costFont) {
-            SDL_Color jaune = {255, 255, 0, 255};
-            char cout1[16], cout2[16], cout3[16];
-            snprintf(cout1, sizeof(cout1), "%d PT", persoActuel->spe_atq1.cout);
-            snprintf(cout2, sizeof(cout2), "%d PT", persoActuel->spe_atq2.cout);
-            snprintf(cout3, sizeof(cout3), "%d PT", persoActuel->spe_atq3.cout);
+        SDL_Color jaune = {255, 255, 0, 255};
+        char cout1[16], cout2[16], cout3[16];
+        snprintf(cout1, sizeof(cout1), "%d PT", persoActuel->spe_atq1.cout);
+        snprintf(cout2, sizeof(cout2), "%d PT", persoActuel->spe_atq2.cout);
+        snprintf(cout3, sizeof(cout3), "%d PT", persoActuel->spe_atq3.cout);
 
-            SDL_Surface* s1 = TTF_RenderUTF8_Blended(costFont, cout1, jaune);
-            SDL_Surface* s2 = TTF_RenderUTF8_Blended(costFont, cout2, jaune);
-            SDL_Surface* s3 = TTF_RenderUTF8_Blended(costFont, cout3, jaune);
+        SDL_Surface* s1 = TTF_RenderUTF8_Blended(policePetite, cout1, jaune);
+        SDL_Surface* s2 = TTF_RenderUTF8_Blended(policePetite, cout2, jaune);
+        SDL_Surface* s3 = TTF_RenderUTF8_Blended(policePetite, cout3, jaune);
 
-            SDL_Texture* t1 = SDL_CreateTextureFromSurface(renderer, s1);
-            SDL_Texture* t2 = SDL_CreateTextureFromSurface(renderer, s2);
-            SDL_Texture* t3 = SDL_CreateTextureFromSurface(renderer, s3);
+        SDL_Texture* t1 = SDL_CreateTextureFromSurface(renderer, s1);
+        SDL_Texture* t2 = SDL_CreateTextureFromSurface(renderer, s2);
+        SDL_Texture* t3 = SDL_CreateTextureFromSurface(renderer, s3);
 
-            SDL_Rect r1 = {btnComp1.rect.x + (btnComp1.rect.w - s1->w)/2, btnComp1.rect.y - s1->h - 5, s1->w, s1->h};
-            SDL_Rect r2 = {btnComp2.rect.x + (btnComp2.rect.w - s2->w)/2, btnComp2.rect.y - s2->h - 5, s2->w, s2->h};
-            SDL_Rect r3 = {btnComp3.rect.x + (btnComp3.rect.w - s3->w)/2, btnComp3.rect.y - s3->h - 5, s3->w, s3->h};
+        SDL_Rect r1 = {btnComp1.rect.x + (btnComp1.rect.w - s1->w)/2, btnComp1.rect.y - s1->h - 5, s1->w, s1->h};
+        SDL_Rect r2 = {btnComp2.rect.x + (btnComp2.rect.w - s2->w)/2, btnComp2.rect.y - s2->h - 5, s2->w, s2->h};
+        SDL_Rect r3 = {btnComp3.rect.x + (btnComp3.rect.w - s3->w)/2, btnComp3.rect.y - s3->h - 5, s3->w, s3->h};
 
-            SDL_RenderCopy(renderer, t1, NULL, &r1);
-            SDL_RenderCopy(renderer, t2, NULL, &r2);
-            SDL_RenderCopy(renderer, t3, NULL, &r3);
+        SDL_RenderCopy(renderer, t1, NULL, &r1);
+        SDL_RenderCopy(renderer, t2, NULL, &r2);
+        SDL_RenderCopy(renderer, t3, NULL, &r3);
 
-            SDL_DestroyTexture(t1); SDL_FreeSurface(s1);
-            SDL_DestroyTexture(t2); SDL_FreeSurface(s2);
-            SDL_DestroyTexture(t3); SDL_FreeSurface(s3);
-            TTF_CloseFont(costFont);
-        }
-
+        SDL_DestroyTexture(t1); SDL_FreeSurface(s1);
+        SDL_DestroyTexture(t2); SDL_FreeSurface(s2);
+        SDL_DestroyTexture(t3); SDL_FreeSurface(s3);
 
         SDL_RenderPresent(renderer);
 
@@ -339,81 +368,66 @@ void actionPerso(SDL_Renderer* renderer, Fighter* persoActuel, int equipeAdverse
             } else if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
                 int id = partieActuelle.perso_actif;
                 AttaqueSauvegarde* attaque = &tableauAttaqueDuTour[id];
-        
+
                 if (btnAttaque.hovered) {
                     *attaque = (AttaqueSauvegarde){
                         .idAttaque = ATTAQUE_BASIQUE,
-                        .utilisateurEquipe = get_equipe_id(id),
-                        .utilisateurNum = get_fighter_num(id),
+                        .utilisateurEquipe = (equipeAdverse == 1) ? 2 : 1,
+                        .utilisateurNum = id,
                     };
                     *attaque = choisirCible(renderer, equipeAdverse, *attaque);
                     if (persoActuel->pt < 10) persoActuel->pt += 1;
                     quit = true;
-        
+
                 } else if (btnDefense.hovered) {
                     *attaque = (AttaqueSauvegarde){
                         .idAttaque = DEFENSE,
-                        .utilisateurEquipe = get_equipe_id(id),
-                        .utilisateurNum = get_fighter_num(id),
+                        .utilisateurEquipe = (equipeAdverse == 1) ? 2 : 1,
+                        .utilisateurNum = id,
                         .cibleEquipe = -1,
                         .cibleNum = -1
                     };
-                    if (persoActuel->pt < 10) persoActuel->pt += 1;
-                    if (persoActuel->pt < 10) persoActuel->pt += 1;
+                    if (persoActuel->pt < 10) persoActuel->pt += 2;
                     quit = true;
-        
+
                 } else if (btnComp1.hovered && persoActuel->pt >= persoActuel->spe_atq1.cout) {
                     persoActuel->pt -= persoActuel->spe_atq1.cout;
                     *attaque = (AttaqueSauvegarde){
                         .idAttaque = persoActuel->spe_atq1.id,
-                        .utilisateurEquipe = get_equipe_id(id),
-                        .utilisateurNum = get_fighter_num(id),
+                        .utilisateurEquipe = (equipeAdverse == 1) ? 2 : 1,
+                        .utilisateurNum =id,
                     };
-                    int equipeCible = est_une_attaque_de_soin(attaque->idAttaque) ?
-                                      get_equipe_id(id) : equipeAdverse;
+                    int equipeCible = est_une_attaque_de_soin(attaque->idAttaque) ? ((equipeAdverse == 1) ? 2 : 1 ): equipeAdverse;
                     *attaque = choisirCible(renderer, equipeCible, *attaque);
                     quit = true;
-        
+
                 } else if (btnComp2.hovered && persoActuel->pt >= persoActuel->spe_atq2.cout) {
                     persoActuel->pt -= persoActuel->spe_atq2.cout;
                     *attaque = (AttaqueSauvegarde){
                         .idAttaque = persoActuel->spe_atq2.id,
-                        .utilisateurEquipe = get_equipe_id(id),
-                        .utilisateurNum = get_fighter_num(id),
+                        .utilisateurEquipe = ((equipeAdverse == 1) ? 2 : 1 ),
+                        .utilisateurNum = id,
                     };
-                    int equipeCible = est_une_attaque_de_soin(attaque->idAttaque) ?
-                                      get_equipe_id(id) : equipeAdverse;
+                    int equipeCible = est_une_attaque_de_soin(attaque->idAttaque) ? ((equipeAdverse == 1) ? 2 : 1 ) : equipeAdverse;
                     *attaque = choisirCible(renderer, equipeCible, *attaque);
                     quit = true;
-        
+
                 } else if (btnComp3.hovered && persoActuel->pt >= persoActuel->spe_atq3.cout) {
                     persoActuel->pt -= persoActuel->spe_atq3.cout;
                     *attaque = (AttaqueSauvegarde){
                         .idAttaque = persoActuel->spe_atq3.id,
-                        .utilisateurEquipe = get_equipe_id(id),
-                        .utilisateurNum = get_fighter_num(id),
+                        .utilisateurEquipe = ((equipeAdverse == 1) ? 2 : 1 ),
+                        .utilisateurNum = id,
                     };
-                    int equipeCible = est_une_attaque_de_soin(attaque->idAttaque) ?
-                                      get_equipe_id(id) : equipeAdverse;
+                    int equipeCible = est_une_attaque_de_soin(attaque->idAttaque) ? ((equipeAdverse == 1) ? 2 : 1 ) : equipeAdverse;
                     *attaque = choisirCible(renderer, equipeCible, *attaque);
                     quit = true;
                 }
             }
         }
-        
 
         SDL_Delay(8);
     }
-}
-
-
-
-bool equipe_est_morte(int equipe) {
-    for (int i = 0; i < 3; i++) {
-        Fighter* p = get_fighter(equipe, i);
-        if (p->actu_pv > 0) return false;
-    }
-    return true;
 }
 
 
@@ -444,13 +458,11 @@ bool equipe_est_morte(int equipe) {
 
 void runGame(SDL_Renderer* rendu) {
     arreter_musique("ressource/musique/ogg/selection_personnages.ogg");
-    
     SDL_GetWindowSize(fenetre, &screenWidth, &screenHeight);
 
     partieActuelle.joueur1.fighter1 = persoChoisi[0];
     partieActuelle.joueur1.fighter2 = persoChoisi[2];
     partieActuelle.joueur1.fighter3 = persoChoisi[4];
-
     partieActuelle.joueur2.fighter1 = persoChoisi[1];
     partieActuelle.joueur2.fighter2 = persoChoisi[3];
     partieActuelle.joueur2.fighter3 = persoChoisi[5];
@@ -459,44 +471,41 @@ void runGame(SDL_Renderer* rendu) {
     partieActuelle.tour = 1;
     partieActuelle.equipeQuiCommence = rand() % 2 + 1;
     partieActuelle.fin = false;
-    partieActuelle.mapType = 9;
+    partieActuelle.mapType = rand() % 9;
 
-    partieActuelle.mapType = rand()%9;
     char musiquePath[128];
     snprintf(musiquePath, sizeof(musiquePath), "ressource/musique/ogg/jeu/combat_%d.ogg", partieActuelle.mapType);
 
     switch (partieActuelle.mapType){
-    case 0:     ecartementPont = -25;    break;
-    case 1:     ecartementPont = 20;    break;
-    case 2:     ecartementPont = -25;    break;
-    case 3:     ecartementPont = -10;    break;
-    case 4:     ecartementPont = -20;    break;
-    case 5:     ecartementPont = 10;    break;
-    case 6:     ecartementPont = -20;    break;
-    case 7:     ecartementPont = 70;    break;
-    case 8:     ecartementPont = -50;    break;    
-    default:
-        break;
-    }
-    jouerMusique(musiquePath, 20);
-    for (int i = 0; i < NB_PERSOS_EQUIPE * 2; i++) {
-        tableauAttaqueDuTour[i] = (AttaqueSauvegarde){ .idAttaque = -1 };
+        case 0: ecartementPont = -25; break;
+        case 1: ecartementPont = 20; break;
+        case 2: ecartementPont = -25; break;
+        case 3: ecartementPont = -10; break;
+        case 4: ecartementPont = -20; break;
+        case 5: ecartementPont = 10; break;
+        case 6: ecartementPont = -20; break;
+        case 7: ecartementPont = 70; break;
+        case 8: ecartementPont = -50; break;
+        default: break;
     }
 
+    jouerMusique(musiquePath, 20);
+
     while (!partieActuelle.fin) {
+        for (int i = 0; i < NB_PERSOS_EQUIPE * 2; i++) {
+            tableauAttaqueDuTour[i] = (AttaqueSauvegarde){ .idAttaque = -1 };
+        }
+
         renduJeu(rendu);
         SDL_Log("==================================== Tour %d =======================================", partieActuelle.tour);
         animationNouveauTour(rendu, partieActuelle.tour);
 
         int equipeDebut = (partieActuelle.tour % 2 == 0) ? partieActuelle.equipeQuiCommence : 3 - partieActuelle.equipeQuiCommence;
 
-
-
         // Tour de la première équipe
         for (int i = 0; i < 3; i++) {
-            Fighter* perso = get_fighter(equipeDebut, i);
+            Fighter* perso = get_fighter((equipeDebut == 2) ? i + 3 : i);
             if (perso->actu_pv <= 0) continue;
-
             appliquer_et_mettre_a_jour_effets(perso);
             partieActuelle.perso_actif = (equipeDebut == 1) ? i : i + 3;
             actionPerso(rendu, perso, (equipeDebut == 1) ? 2 : 1);
@@ -504,9 +513,8 @@ void runGame(SDL_Renderer* rendu) {
 
         // Tour de la seconde équipe
         for (int i = 0; i < 3; i++) {
-            Fighter* perso = get_fighter(3 - equipeDebut, i);
+            Fighter* perso = get_fighter((equipeDebut == 1) ? i + 3 : i);
             if (perso->actu_pv <= 0) continue;
-
             appliquer_et_mettre_a_jour_effets(perso);
             partieActuelle.perso_actif = (equipeDebut == 1) ? i + 3 : i;
             actionPerso(rendu, perso, (equipeDebut == 1) ? 1 : 2);
@@ -514,7 +522,24 @@ void runGame(SDL_Renderer* rendu) {
 
         partieActuelle.perso_actif = 0;
 
-        // Tri des attaques par vitesse 
+        // Vérifie qu'au moins une action a été faite
+        bool actionTrouvee = false;
+        for (int i = 0; i < NB_PERSOS_EQUIPE * 2; i++) {
+            if (tableauAttaqueDuTour[i].idAttaque >= 0) {
+                actionTrouvee = true;
+                break;
+            }
+        }
+
+        if (!actionTrouvee) {
+            SDL_Log("Aucune attaque détectée. En attente d'action...");
+            SDL_Delay(1000);
+            continue; // Ne pas avancer le tour
+        }
+
+        // Tri par vitesse
+
+
         int tabIdVitesse[6] = {0, 1, 2, 3, 4, 5};
         for (int i = 0; i < 5; i++) {
             for (int j = i + 1; j < 6; j++) {
@@ -529,37 +554,50 @@ void runGame(SDL_Renderer* rendu) {
         }
 
 
+
+        // Exécution des attaques
         for (int i = 0; i < NB_PERSOS_EQUIPE * 2; i++) {
             int index = tabIdVitesse[i];
             AttaqueSauvegarde action = tableauAttaqueDuTour[index];
-            Fighter* utilisateur = get_fighter(action.utilisateurEquipe, action.utilisateurNum);
-            Fighter* cible = get_fighter(action.cibleEquipe, action.cibleNum);
-        
+            
+            SDL_Log("actionUtilisateurEquipe : %d\n actionUtilisateurNum : %d\n",action.utilisateurEquipe,
+                                                                action.utilisateurNum);
+            
+            Fighter* utilisateur = get_fighter(action.utilisateurNum);
+            Fighter* cible = get_fighter(action.cibleNum);
+
+            SDL_Log("\ntest 1\n");
+
+
             if (action.idAttaque >= 0 && action.idAttaque < NB_ATTAQUES_TOTAL) {
                 if (!toutes_les_attaques[action.idAttaque]) {
-                    SDL_Log("Erreur : attaque id %d n'est pas initialisée dans toutes_les_attaques", action.idAttaque);
+                    SDL_Log("Erreur : attaque id %d non initialisée", action.idAttaque);
                     continue;
                 }
-        
-                AttaqueSpecial* atq = toutes_les_attaques[action.idAttaque];            
+
+                AttaqueSpecial* atq = toutes_les_attaques[action.idAttaque];
                 SDL_Rect rectUtilisateur = get_rect_fighter(utilisateur);
                 SDL_Rect rectCible = get_rect_fighter(cible);
-                jouerAnimationAttaque(rendu, atq->type, rectUtilisateur, rectCible, utilisateur->element);
+                
+                SDL_Log("\ntest 2\n");
+
+                //jouerAnimationAttaque(rendu, atq->type, rectUtilisateur, rectCible, utilisateur->element);
                 renduJeu(rendu);
 
-                if (cible != NULL) {
-                    if (cible->pt < 10) {
-                        cible->pt += 1;
-                    }
-                }
-        
+                if (cible && cible->pt < 10) cible->pt += 1;
                 
-        
+                SDL_Log("\ntest 3\n");
+                
+                
+                SDL_Log("ActionIdAttaque : %d\n Utilisateur : %s\n  Cible : %s\n",action.idAttaque,utilisateur->nom,
+                                                                    cible->nom);
+
+
                 fonctions_attaques[action.idAttaque](utilisateur, cible);
             } else {
-                SDL_Log("Erreur : attaque id %d invalide ou cible/utilisateur manquant", action.idAttaque);
+                SDL_Log("Erreur : attaque invalide id=%d", action.idAttaque);
             }
-        }        
+        }
 
         if (equipe_est_morte(1)) {
             SDL_Log("L'équipe 1 est éliminée. L'équipe 2 gagne !");

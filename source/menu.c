@@ -22,6 +22,8 @@ int musiqueRes=1;
 
 
 
+//lol
+
 
 
 
@@ -260,19 +262,8 @@ Page afficher_menu(SDL_Renderer* rendu) {
     };
     const char* ids_textes[] = {"jouer", "options", "quitter"};
 
-    // Position trophée (en bas à droite)
-    SDL_Rect rect_trophee = {
-        LARGEUR_FENETRE - 120,   // x
-        HAUTEUR_FENETRE - 140,   // y
-        100, 100                 // w, h
-    };
-
-    // Position manette (au-dessus du trophée)
-    SDL_Rect rect_manette = {
-        LARGEUR_FENETRE - 120,
-        HAUTEUR_FENETRE - 260,
-        100, 100
-    };
+    SDL_Rect rect_trophee = {LARGEUR_FENETRE - 120, HAUTEUR_FENETRE - 140, 100, 100};
+    SDL_Rect rect_manette = {LARGEUR_FENETRE - 120, HAUTEUR_FENETRE - 260, 100, 100};
 
     SDL_RenderClear(rendu);
     SDL_RenderCopy(rendu, fond, NULL, NULL);
@@ -293,35 +284,69 @@ Page afficher_menu(SDL_Renderer* rendu) {
         SDL_DestroyTexture(tex);
     }
 
-    // Affichage des icônes
     SDL_RenderCopy(rendu, image_trophee, NULL, &rect_trophee);
     SDL_RenderCopy(rendu, image_manette, NULL, &rect_manette);
-
     SDL_RenderPresent(rendu);
 
     SDL_Event event;
     while (1) {
         while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) return PAGE_QUITTER;
+            if (event.type == SDL_QUIT) {
+                TTF_CloseFont(police);
+                SDL_DestroyTexture(fond);
+                SDL_DestroyTexture(cadre_titre);
+                SDL_DestroyTexture(cadre_bouton);
+                SDL_DestroyTexture(image_trophee);
+                SDL_DestroyTexture(image_manette);
+                return PAGE_QUITTER;
+            }
 
             if (event.type == SDL_MOUSEBUTTONDOWN) {
                 int x = event.button.x, y = event.button.y;
 
                 if (x >= boutons[0].x && x <= boutons[0].x + boutons[0].w &&
-                    y >= boutons[0].y && y <= boutons[0].y + boutons[0].h)
+                    y >= boutons[0].y && y <= boutons[0].y + boutons[0].h) {
+                    TTF_CloseFont(police);
+                    SDL_DestroyTexture(fond);
+                    SDL_DestroyTexture(cadre_titre);
+                    SDL_DestroyTexture(cadre_bouton);
+                    SDL_DestroyTexture(image_trophee);
+                    SDL_DestroyTexture(image_manette);
                     return PAGE_SELEC_MODE;
+                }
 
                 if (x >= boutons[1].x && x <= boutons[1].x + boutons[1].w &&
-                    y >= boutons[1].y && y <= boutons[1].y + boutons[1].h)
+                    y >= boutons[1].y && y <= boutons[1].y + boutons[1].h) {
+                    TTF_CloseFont(police);
+                    SDL_DestroyTexture(fond);
+                    SDL_DestroyTexture(cadre_titre);
+                    SDL_DestroyTexture(cadre_bouton);
+                    SDL_DestroyTexture(image_trophee);
+                    SDL_DestroyTexture(image_manette);
                     return PAGE_OPTIONS;
+                }
 
                 if (x >= boutons[2].x && x <= boutons[2].x + boutons[2].w &&
-                    y >= boutons[2].y && y <= boutons[2].y + boutons[2].h)
+                    y >= boutons[2].y && y <= boutons[2].y + boutons[2].h) {
+                    TTF_CloseFont(police);
+                    SDL_DestroyTexture(fond);
+                    SDL_DestroyTexture(cadre_titre);
+                    SDL_DestroyTexture(cadre_bouton);
+                    SDL_DestroyTexture(image_trophee);
+                    SDL_DestroyTexture(image_manette);
                     return PAGE_QUITTER;
+                }
             }
         }
     }
 
+    // Nettoyage (normalement jamais atteint)
+    TTF_CloseFont(police);
+    SDL_DestroyTexture(fond);
+    SDL_DestroyTexture(cadre_titre);
+    SDL_DestroyTexture(cadre_bouton);
+    SDL_DestroyTexture(image_trophee);
+    SDL_DestroyTexture(image_manette);
     return PAGE_MENU;
 }
 
@@ -704,7 +729,7 @@ Page afficher_credit(SDL_Renderer* rendu, Page page_prec){
         SDL_RenderPresent(rendu);
 
         SDL_Delay(30);
-        y_offset -= 5; // Défilement rapide
+        y_offset -=5; // Défilement rapide
 
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
@@ -911,6 +936,7 @@ Page afficher_selec_mode(SDL_Renderer* rendu) {
                 if (x >= boutons[0].x && x <= boutons[0].x + boutons[0].w &&
                     y >= boutons[0].y && y <= boutons[0].y + boutons[0].h) {
                     chemin_retour = 0;
+                    partieActuelle.iaDifficulte = 0;
                     return PAGE_SELECTION_PERSO;
                 }
 
@@ -935,20 +961,28 @@ Page afficher_selec_difficulte(SDL_Renderer* rendu) {
     SDL_Texture* cadre_bouton = IMG_LoadTexture(rendu, "ressource/image/cadres/cadre_texte_carre.png");
     SDL_Texture* bouton_retour = IMG_LoadTexture(rendu, "ressource/image/utilité/retour.png");
 
-    TTF_Font* police = TTF_OpenFont("ressource/langue/police/arial.ttf", 40);
-    SDL_Color noir = {0, 0, 0, 255};
+    TTF_Font* police = TTF_OpenFont("ressource/langue/police/arial.ttf", 38);
+    TTF_Font* police_titre = TTF_OpenFont("ressource/langue/police/arial.ttf", 56);
 
-    int marge = 30;
-    int largeur_bouton = LARGEUR_FENETRE - 2 * marge;
-    int hauteur_bouton = (HAUTEUR_FENETRE - 4 * marge) / 3;
+    SDL_Color doré = {255, 215, 0, 255};   // texte doré
+    SDL_Color blanc = {255, 255, 255, 255};
+    SDL_Color noir = {0, 0, 0, 255};
 
     const char* ids_difficulte[] = {"facile", "moyen", "difficile"};
 
-    SDL_Rect boutons[3] = {
-        {marge, marge, largeur_bouton, hauteur_bouton},
-        {marge, 2 * marge + hauteur_bouton, largeur_bouton, hauteur_bouton},
-        {marge, 3 * marge + 2 * hauteur_bouton, largeur_bouton, hauteur_bouton}
-    };
+    int largeur_bouton = 450;
+    int hauteur_bouton = 120;
+    int espacement = 50;
+    int x_centre = (LARGEUR_FENETRE - largeur_bouton) / 2;
+    int start_y = 250;
+
+    SDL_Rect boutons[3];
+    for (int i = 0; i < 3; i++) {
+        boutons[i].x = x_centre;
+        boutons[i].y = start_y + i * (hauteur_bouton + espacement);
+        boutons[i].w = largeur_bouton;
+        boutons[i].h = hauteur_bouton;
+    }
 
     SDL_Rect retour = {20, HAUTEUR_FENETRE - 100, 80, 80};
 
@@ -957,63 +991,95 @@ Page afficher_selec_difficulte(SDL_Renderer* rendu) {
         SDL_RenderClear(rendu);
         SDL_RenderCopy(rendu, fond, NULL, NULL);
 
+        // === Titre stylisé ===
+        SDL_Surface* surf_ombre_titre = TTF_RenderUTF8_Solid(police_titre, "Choix de la Difficulté", noir);
+        SDL_Surface* surf_titre = TTF_RenderUTF8_Solid(police_titre, "Choix de la Difficulté", doré);
+        SDL_Texture* tex_ombre_titre = SDL_CreateTextureFromSurface(rendu, surf_ombre_titre);
+        SDL_Texture* tex_titre = SDL_CreateTextureFromSurface(rendu, surf_titre);
+
+        SDL_Rect rect_titre = {
+            (LARGEUR_FENETRE - surf_titre->w) / 2,
+            80,
+            surf_titre->w,
+            surf_titre->h
+        };
+        SDL_Rect rect_ombre = rect_titre;
+        rect_ombre.x += 3;
+        rect_ombre.y += 3;
+
+        SDL_RenderCopy(rendu, tex_ombre_titre, NULL, &rect_ombre);
+        SDL_RenderCopy(rendu, tex_titre, NULL, &rect_titre);
+
+        SDL_FreeSurface(surf_ombre_titre);
+        SDL_FreeSurface(surf_titre);
+        SDL_DestroyTexture(tex_ombre_titre);
+        SDL_DestroyTexture(tex_titre);
+
+        // === Gestion de la souris ===
+        int x, y;
+        SDL_GetMouseState(&x, &y);
+
         for (int i = 0; i < 3; i++) {
-            SDL_RenderCopy(rendu, cadre_bouton, NULL, &boutons[i]);
-            SDL_Surface* surf = TTF_RenderUTF8_Solid(police, getTexte(ids_difficulte[i]), noir);
-            SDL_Texture* tex = SDL_CreateTextureFromSurface(rendu, surf);
-            SDL_Rect txt = {
-                boutons[i].x + (boutons[i].w - surf->w) / 2,
-                boutons[i].y + (boutons[i].h - surf->h) / 2,
-                surf->w,
-                surf->h
+            SDL_Rect* btn = &boutons[i];
+            bool survol = (x >= btn->x && x <= btn->x + btn->w &&
+                           y >= btn->y && y <= btn->y + btn->h);
+
+            if (survol) {
+                SDL_SetTextureColorMod(cadre_bouton, 255, 230, 150); // jaune clair
+            } else {
+                SDL_SetTextureColorMod(cadre_bouton, 255, 255, 255); // normal
+            }
+
+            SDL_RenderCopy(rendu, cadre_bouton, NULL, btn);
+
+            SDL_Surface* surf_ombre = TTF_RenderUTF8_Solid(police, getTexte(ids_difficulte[i]), noir);
+            SDL_Surface* surf_txt = TTF_RenderUTF8_Solid(police, getTexte(ids_difficulte[i]), blanc);
+
+            SDL_Texture* tex_ombre = SDL_CreateTextureFromSurface(rendu, surf_ombre);
+            SDL_Texture* tex_txt = SDL_CreateTextureFromSurface(rendu, surf_txt);
+
+            SDL_Rect rect_txt = {
+                btn->x + (btn->w - surf_txt->w) / 2,
+                btn->y + (btn->h - surf_txt->h) / 2,
+                surf_txt->w, surf_txt->h
             };
-            SDL_RenderCopy(rendu, tex, NULL, &txt);
-            SDL_FreeSurface(surf);
-            SDL_DestroyTexture(tex);
+            SDL_Rect rect_ombre_txt = rect_txt;
+            rect_ombre_txt.x += 2;
+            rect_ombre_txt.y += 2;
+
+            SDL_RenderCopy(rendu, tex_ombre, NULL, &rect_ombre_txt);
+            SDL_RenderCopy(rendu, tex_txt, NULL, &rect_txt);
+
+            SDL_FreeSurface(surf_ombre);
+            SDL_FreeSurface(surf_txt);
+            SDL_DestroyTexture(tex_ombre);
+            SDL_DestroyTexture(tex_txt);
         }
 
         SDL_RenderCopy(rendu, bouton_retour, NULL, &retour);
         SDL_RenderPresent(rendu);
 
         while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) {
-                return PAGE_QUITTER;
-            }
-        
-            if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
-                int x = event.button.x, y = event.button.y;
+            if (event.type == SDL_QUIT) return PAGE_QUITTER;
 
-                // Clic sur retour
+            if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
+                x = event.button.x;
+                y = event.button.y;
+
                 if (x >= retour.x && x <= retour.x + retour.w &&
                     y >= retour.y && y <= retour.y + retour.h) {
                     return PAGE_SELEC_MODE;
                 }
-                
-                // Clic sur "Facile"
-                if (x >= boutons[0].x && x <= boutons[0].x + boutons[0].w &&
-                    y >= boutons[0].y && y <= boutons[0].y + boutons[0].h) {
-                  
-                        partieActuelle.iaDifficulte=1;
+
+                for (int i = 0; i < 3; i++) {
+                    if (x >= boutons[i].x && x <= boutons[i].x + boutons[i].w &&
+                        y >= boutons[i].y && y <= boutons[i].y + boutons[i].h) {
+                        partieActuelle.iaDifficulte = i + 1;
                         return PAGE_SELECTION_PERSO;
+                    }
                 }
-        
-                // Clic sur "Moyen"
-                if (x >= boutons[1].x && x <= boutons[1].x + boutons[1].w &&
-                    y >= boutons[1].y && y <= boutons[1].y + boutons[1].h) {
-                  
-                        partieActuelle.iaDifficulte=2;
-                        return PAGE_SELECTION_PERSO;
-                }
-        
-                // Clic sur "Difficile"
-                if (x >= boutons[2].x && x <= boutons[2].x + boutons[2].w &&
-                    y >= boutons[2].y && y <= boutons[2].y + boutons[2].h) {
-                    
-                        partieActuelle.iaDifficulte=3;
-                        return PAGE_SELECTION_PERSO;
-                }
-        
             }
         }
     }
 }
+
