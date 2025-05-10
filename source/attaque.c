@@ -76,6 +76,7 @@ void soin_effet(Fighter* lanceur, Fighter* cible, int quantite) {
 }
 
 void defense(Fighter* attaquant, Fighter* cible) {
+    attaquant->statutEffet = 13 ;
     SDL_Log("%s Choisi de ce defendre\n", attaquant->nom);
 }
 

@@ -24,34 +24,49 @@ Fighter appliquer_modificateurs(Fighter* original){
     switch (copie.statutEffet) {
         case 3: // Boost défense
             copie.defense += copie.defense * 0.25;
+            SDL_Log("%s boost sa defense", copie.nom);
+
             break;
         case 4: // Boost attaque
             copie.attaque += copie.attaque * 0.25;
+            SDL_Log("%s boost son attaque", copie.nom);
+
             break;
         case 5: // Boost vitesse
             copie.vitesse += copie.vitesse * 0.25;
+            SDL_Log("%s boost sa vitesse", copie.nom);
+
             break;
         case 6: // Nerf défense
             copie.defense -= copie.defense * 0.25;
+            SDL_Log("La defense de %s diminue", copie.nom);
+
             break;
         case 7: // Nerf attaque
             copie.attaque -= copie.attaque * 0.25;
+            SDL_Log("L'attaque de %s diminue", copie.nom);
             break;
         case 8: // Nerf vitesse
             copie.vitesse -= copie.vitesse * 0.25;
+            SDL_Log("La vitesse de %s diminue", copie.nom);
             break;
         case 9: // Nerf agilité
             copie.agilite -= copie.agilite * 0.25;
+            SDL_Log("L'agilité de %s diminue", copie.nom);
             break;
         case 10: // Boost agilité
             copie.agilite += copie.agilite * 0.25;
+            SDL_Log("%s boost son agilité", copie.nom);
             break;
         case 11: // Gel : nerf général léger
             copie.attaque  -= copie.attaque  * 0.1;
             copie.defense  -= copie.defense  * 0.1;
             copie.vitesse  -= copie.vitesse  * 0.1;
             copie.agilite  -= copie.agilite  * 0.1;
+            SDL_Log("%s est Gelé", copie.nom);
             break;
+        case 13: // Defense classique
+            copie.defense += copie.defense * 0.1;
     }
 
     return copie;
@@ -62,6 +77,13 @@ void appliquer_et_mettre_a_jour_effets(Fighter* perso) {
     if (perso->dureeEffet <= 0 || perso->statutEffet == 0) return;
 
     switch (perso->statutEffet) {
+        case 1:{    //Saignement : -10% PV max
+            int perte = perso->max_pv * 0.1;
+            perso->actu_pv -= perte;
+            if (perso->actu_pv < 0) perso->actu_pv = 0;
+            SDL_Log("%s perds du sang (-%d PV)", perso->nom, perte);
+            break;
+        }
         case 2: { // Brûlure : -5% PV max
             int perte = perso->max_pv * 0.05;
             perso->actu_pv -= perte;
@@ -262,20 +284,6 @@ Fighter* get_fighter_by_index(int index) {
     }
 }
 
-/*
-int get_equipe_id(int index) {
-    // Joueur 1 : index pair, Joueur 2 : index impair
-    return (index % 2 == 0) ? 1 : 2;
-}
-
-//Va te faire enculer espece de gros fdp va te faire sodomiser par des ane christine rinoceros aveugle et enceinte
-
-
-int get_fighter_num(int index) {
-    // Chaque joueur a les index 0/2/4 (J1) et 1/3/5 (J2)
-    return index / 2; // 0 pour 0/1, 1 pour 2/3, 2 pour 4/5
-}
-*/
 
 bool isMouseOver(Button* btn, int x, int y) {
     return x >= btn->rect.x && x <= btn->rect.x + btn->rect.w &&
@@ -290,9 +298,17 @@ bool est_une_attaque_de_soin(int id) {
            id == ATQ_SOUFFLE_DE_VIE;
 }
 
+bool est_un_boost_de_def(int id){
+    return id == ATQ_ESPRIT_FLAMBOYANT ||
+           id == ATQ_BARRIERE_DE_PIERRE ||
+           id == ATQ_RUGISSEMENT_D_ACIER ||
+           id == ATQ_BRUME_PROTECTRICE;
+}
 
-
-
+bool est_un_boost_att(int id){
+    return id == ATQ_EVEIL_SABRE ||
+           id == ATQ_ESPRIT_FLAMBOYANT;
+}
 
 
 void actionPerso(SDL_Renderer* renderer, Fighter* persoActuel, int equipeAdverse) {
@@ -581,7 +597,7 @@ void runGame(SDL_Renderer* rendu) {
                 
                 SDL_Log("\ntest 2\n");
 
-                //jouerAnimationAttaque(rendu, atq->type, rectUtilisateur, rectCible, utilisateur->element);
+                jouerAnimationAttaque(rendu, atq->type, rectUtilisateur, rectCible, utilisateur->element);
                 renduJeu(rendu);
 
                 if (cible && cible->pt < 10) cible->pt += 1;
