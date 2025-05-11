@@ -75,6 +75,7 @@ typedef struct {
     int statutEffet;        // 1 = Saignement, 2 = Brulur, 3 = Boost def, 4 = Boost attaque, 5 = Boost vitesse, 6 = Nerf def,
                             // 7 = Nerf attaque , 8 = Nerf vitesse, 9 = Nerf Agilité, 10 = Boost Agilité, 11 = Gel; 12 = paralysie, 13 = defense classique
     int dureeEffet;         // durée en tours restants
+    int protegePar; // -1 si pas protégé, sinon contient l'index du protecteur (entre 0 et 5)   Pour Incassable
 
     ElementType element;
     AttaqueSpecial spe_atq1, spe_atq2, spe_atq3;

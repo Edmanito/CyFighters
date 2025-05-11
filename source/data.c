@@ -329,6 +329,8 @@ Fighter incassable={
 
 
 
+
+
 Fighter get_fighter_depuis_nom(int index) {
     switch (index) {
         case 0: return darkshadow;

@@ -20,7 +20,9 @@ AttaqueSauvegarde tableauAttaqueDuTour [NB_PERSOS_EQUIPE * 2];
 
 Fighter appliquer_modificateurs(Fighter* original){
     Fighter copie = *original;
-
+    if (copie.statutEffet == 3 && copie.dureeEffet > 0) {
+        copie.defense += copie.defense * 0.25;  // +25%
+    }
     switch (copie.statutEffet) {
         case 3: // Boost défense
             copie.defense += copie.defense * 0.25;
@@ -310,6 +312,11 @@ bool est_un_boost_att(int id){
            id == ATQ_ESPRIT_FLAMBOYANT;
 }
 
+bool est_mur_vivant(int id) {
+    return id == ATQ_MUR_VIVANT;
+}
+
+
 
 void actionPerso(SDL_Renderer* renderer, Fighter* persoActuel, int equipeAdverse) {
     if (!policePrincipale || !policePetite) {
@@ -411,33 +418,60 @@ void actionPerso(SDL_Renderer* renderer, Fighter* persoActuel, int equipeAdverse
                     *attaque = (AttaqueSauvegarde){
                         .idAttaque = persoActuel->spe_atq1.id,
                         .utilisateurEquipe = (equipeAdverse == 1) ? 2 : 1,
-                        .utilisateurNum =id,
+                        .utilisateurNum = id,
                     };
-                    int equipeCible = est_une_attaque_de_soin(attaque->idAttaque) ? ((equipeAdverse == 1) ? 2 : 1 ): equipeAdverse;
+                    int equipeCible;
+                    if (est_mur_vivant(attaque->idAttaque) && strcmp(persoActuel->nom, "incassable") == 0) {
+                        equipeCible = (equipeAdverse == 1) ? 2 : 1;
+                    } else {
+                        equipeCible = (est_une_attaque_de_soin(attaque->idAttaque) || est_un_boost_de_def(attaque->idAttaque))
+                                    ? ((equipeAdverse == 1) ? 2 : 1)
+                                    : equipeAdverse;
+                    }
+
                     *attaque = choisirCible(renderer, equipeCible, *attaque);
                     quit = true;
+
 
                 } else if (btnComp2.hovered && persoActuel->pt >= persoActuel->spe_atq2.cout) {
                     persoActuel->pt -= persoActuel->spe_atq2.cout;
                     *attaque = (AttaqueSauvegarde){
                         .idAttaque = persoActuel->spe_atq2.id,
-                        .utilisateurEquipe = ((equipeAdverse == 1) ? 2 : 1 ),
+                        .utilisateurEquipe = (equipeAdverse == 1) ? 2 : 1,
                         .utilisateurNum = id,
                     };
-                    int equipeCible = est_une_attaque_de_soin(attaque->idAttaque) ? ((equipeAdverse == 1) ? 2 : 1 ) : equipeAdverse;
+                    int equipeCible;
+                    if (est_mur_vivant(attaque->idAttaque) && strcmp(persoActuel->nom, "incassable") == 0) {
+                        equipeCible = (equipeAdverse == 1) ? 2 : 1;
+                    } else {
+                        equipeCible = (est_une_attaque_de_soin(attaque->idAttaque) || est_un_boost_de_def(attaque->idAttaque))
+                                    ? ((equipeAdverse == 1) ? 2 : 1)
+                                    : equipeAdverse;
+                    }
+
                     *attaque = choisirCible(renderer, equipeCible, *attaque);
                     quit = true;
+
 
                 } else if (btnComp3.hovered && persoActuel->pt >= persoActuel->spe_atq3.cout) {
                     persoActuel->pt -= persoActuel->spe_atq3.cout;
                     *attaque = (AttaqueSauvegarde){
                         .idAttaque = persoActuel->spe_atq3.id,
-                        .utilisateurEquipe = ((equipeAdverse == 1) ? 2 : 1 ),
+                        .utilisateurEquipe = (equipeAdverse == 1) ? 2 : 1,
                         .utilisateurNum = id,
                     };
-                    int equipeCible = est_une_attaque_de_soin(attaque->idAttaque) ? ((equipeAdverse == 1) ? 2 : 1 ) : equipeAdverse;
+                    int equipeCible;
+                    if (est_mur_vivant(attaque->idAttaque) && strcmp(persoActuel->nom, "incassable") == 0) {
+                        equipeCible = (equipeAdverse == 1) ? 2 : 1;
+                    } else {
+                        equipeCible = (est_une_attaque_de_soin(attaque->idAttaque) || est_un_boost_de_def(attaque->idAttaque))
+                                    ? ((equipeAdverse == 1) ? 2 : 1)
+                                    : equipeAdverse;
+                    }
+
                     *attaque = choisirCible(renderer, equipeCible, *attaque);
                     quit = true;
+
                 }
             }
         }
@@ -569,7 +603,19 @@ void runGame(SDL_Renderer* rendu) {
             }
         }
 
+        // Appliquer Mur Vivant AVANT les attaques
+        for (int i = 0; i < NB_PERSOS_EQUIPE * 2; i++) {
+            AttaqueSauvegarde action = tableauAttaqueDuTour[i];
 
+            if (action.idAttaque == ATQ_MUR_VIVANT) {
+                if (action.cibleNum >= 0 && strcmp(persoChoisi[action.utilisateurNum].nom, "incassable") == 0) {
+                    persoChoisi[action.cibleNum].protegePar = action.utilisateurNum;
+                    SDL_Log("Mur Vivant préparé : %s protégera %s", 
+                        persoChoisi[action.utilisateurNum].nom,
+                        persoChoisi[action.cibleNum].nom);
+                }
+            }
+        }
 
         // Exécution des attaques
         for (int i = 0; i < NB_PERSOS_EQUIPE * 2; i++) {
@@ -622,6 +668,24 @@ void runGame(SDL_Renderer* rendu) {
             SDL_Log("L'équipe 2 est éliminée. L'équipe 1 gagne !");
             partieActuelle.fin = true;
         }
+        // Mise à jour des statuts temporaires (ex: bonus défense temporaire)
+        for (int i = 0; i < NB_PERSOS_EQUIPE * 2; i++) {
+            Fighter* f = get_fighter(i);
+            if (f->dureeEffet > 0) {
+                f->dureeEffet--;
+                if (f->dureeEffet == 0 && f->statutEffet == 3) {
+                    f->statutEffet = 0;
+                    SDL_Log("%s perd son bonus de défense.", f->nom);
+                }
+            }
+        }
+
+
+
+        for (int i = 0; i < NB_PERSOS_EQUIPE * 2; i++) {
+            persoChoisi[i].protegePar = -1;
+        }
+
 
         partieActuelle.tour++;
     }
