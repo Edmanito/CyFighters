@@ -652,7 +652,6 @@ void runGame(SDL_Renderer* rendu) {
         }
 
         renduJeu(rendu);
-        SDL_Log("==================================== Tour %d =======================================", partieActuelle.tour);
         animationNouveauTour(rendu, partieActuelle.tour);
         int equipeDebut = (partieActuelle.tour % 2 == 0) ? partieActuelle.equipeQuiCommence : 3 - partieActuelle.equipeQuiCommence;
 
