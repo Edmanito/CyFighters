@@ -327,15 +327,18 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     break;
 
                                 default :
-                                    strcpy(persoChoisi[a].nom,"lukas");
-                                    persoChoisi[a].actu_pv=lukas.actu_pv;
-                                    persoChoisi[a].max_pv=lukas.max_pv;
-                                    persoChoisi[a].attaque=lukas.attaque;
-                                    persoChoisi[a].defense=lukas.defense;
-                                    persoChoisi[a].agilite=lukas.agilite;
-                                    persoChoisi[a].vitesse=lukas.vitesse;
-                                    persoChoisi[a].element=lukas.element;
-            
+                                    strcpy(persoChoisi[a].nom,"zoro");
+                                    persoChoisi[a].actu_pv=zoro.actu_pv;
+                                    persoChoisi[a].max_pv=zoro.max_pv;
+                                    persoChoisi[a].attaque=zoro.attaque;
+                                    persoChoisi[a].defense=zoro.defense;
+                                    persoChoisi[a].agilite=zoro.agilite;
+                                    persoChoisi[a].vitesse=zoro.vitesse;
+                                    persoChoisi[a].element=zoro.element;
+                                    persoChoisi[a].spe_atq1 = affutageMortal;
+                                    persoChoisi[a].spe_atq2 = assautTranchant;
+                                    persoChoisi[a].spe_atq3 = eveilDuSabre;
+                                    index_selection[a] = i;
                                     break;
                             }
                             
@@ -501,15 +504,18 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
         
                                         default :
                                             SDL_Log("Crash ce n'est pas normal");
-                                            strcpy(persoChoisi[a].nom,"lukas");
-                                            persoChoisi[a].actu_pv=lukas.actu_pv;
-                                            persoChoisi[a].max_pv=lukas.max_pv;
-                                            persoChoisi[a].attaque=lukas.attaque;
-                                            persoChoisi[a].defense=lukas.defense;
-                                            persoChoisi[a].agilite=lukas.agilite;
-                                            persoChoisi[a].vitesse=lukas.vitesse;
-                                            persoChoisi[a].element=lukas.element;
-                    
+                                            strcpy(persoChoisi[a].nom,"zoro");
+                                            persoChoisi[a].actu_pv=zoro.actu_pv;
+                                            persoChoisi[a].max_pv=zoro.max_pv;
+                                            persoChoisi[a].attaque=zoro.attaque;
+                                            persoChoisi[a].defense=zoro.defense;
+                                            persoChoisi[a].agilite=zoro.agilite;
+                                            persoChoisi[a].vitesse=zoro.vitesse;
+                                            persoChoisi[a].element=zoro.element;
+                                            persoChoisi[a].spe_atq1 = affutageMortal;
+                                            persoChoisi[a].spe_atq2 = assautTranchant;
+                                            persoChoisi[a].spe_atq3 = eveilDuSabre;
+                                            index_selection[a] = i;
                                             break;
                                     }
                                 } while (!perso_disponible[choix]);

@@ -326,19 +326,6 @@ Fighter incassable={
 
 
 
-Fighter lukas={
-    .nom = "LoukasCocasse",
-    .actu_pv = 69696969,
-    .max_pv =69696969,
-    .attaque = 69696969,
-    .defense = 69696969,
-    .agilite = 69696969,
-    .vitesse = 69696969,
-    .magie = 69696969,
-    .element = ELEMENT_CRISTAL,
-    .pt = 0
-};
-
 
 
 

@@ -69,7 +69,7 @@ Fighter appliquer_modificateurs(Fighter* original){
             copie.defense += copie.defense * 0.1;
     }
 
-    return copie;
+    return *original;
 }
 
 

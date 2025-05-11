@@ -183,7 +183,7 @@ void attaque_crepuscule(Fighter* attaquant, Fighter* cible) {
 void attaque_hurlement_noir(Fighter* attaquant, Fighter* cible) {
     Fighter a = appliquer_modificateurs(attaquant);
     Fighter c = appliquer_modificateurs(cible);
-    int degats = (a.magie * 0.7) * 2 - c.magie;
+    int degats = (a.magie) * 2 - c.magie;
     if (degats < 10) degats = 10;
     cible->actu_pv -= degats;
     if (cible->actu_pv < 0) cible->actu_pv = 0;
@@ -204,7 +204,7 @@ void attaque_danse_du_vent(Fighter* attaquant, Fighter* cible) {
 void attaque_vent_percant(Fighter* attaquant, Fighter* cible) {
     Fighter a = appliquer_modificateurs(attaquant);
     Fighter c = appliquer_modificateurs(cible);
-    int degats = (a.magie * 0.7) * 2 - c.magie;
+    int degats = (a.magie) * 2 - c.magie;
     if (degats < 10) degats = 10;
     cible->actu_pv -= degats;
     if (cible->actu_pv < 0) cible->actu_pv = 0;
