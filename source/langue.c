@@ -58,7 +58,8 @@ const char* getTexte(const char* id) {
                   "Bienvenido a Project Shōnen Smash.", 
                   "Willkommen bei Project Shōnen Smash."},
     };
-
+   
+    // Recherche de l’identifiant et retour de la bonne langue
     for (unsigned int i = 0; i < sizeof(dico)/sizeof(dico[0]); i++) {
         if (strcmp(id, dico[i].id) == 0) {
             switch (langueActuelle) {
@@ -69,10 +70,12 @@ const char* getTexte(const char* id) {
             }
         }
     }
-
-    return id;  // fallback
+    
+    // Si aucun texte trouvé : retourne l'identifiant lui-même
+    return id; 
 }
 
+// Fonction pour changer la langue globale du jeu
 void changerLangue(Langue nouvelle) {
     langueActuelle = nouvelle;
 }

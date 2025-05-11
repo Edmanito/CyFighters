@@ -1,12 +1,13 @@
-
 #ifndef ATTAQUE_H
 #define ATTAQUE_H
 
 #include <stdio.h>
 #include <string.h>
+#include "data.h" // Contient les définitions de Fighter et AttaqueSpecial
 
-#include "data.h" 
-
+// === Identifiants uniques pour chaque attaque ===
+// Ces constantes sont utilisées pour associer un identifiant à chaque attaque.
+// Elles doivent être synchronisées avec les données dans le .c
 #define ATTAQUE_BASIQUE 0
 #define DEFENSE 1
 #define AFFUTAGE_MORTAL 2
@@ -33,12 +34,16 @@
 #define MUR_VIVANT 23
 #define BARRIERE_DE_PIERRE 24
 #define RUGISSEMENT_D_ACIER 25
-#define NB_ATTAQUES_TOTAL 26
 
-void attaqueClassique(Fighter *attaquant, Fighter *cible);
-void defense(Fighter* attaquant, Fighter* cible);
-void init_attaques();
+#define NB_ATTAQUES_TOTAL 26 // Nombre total d'attaques disponibles
 
+// === Fonctions de base appelées pendant les combats ===
+void attaqueClassique(Fighter *attaquant, Fighter *cible); // Frappe simple
+void defense(Fighter* attaquant, Fighter* cible);           // Se défendre
+void init_attaques(); // Initialise le tableau de toutes les attaques spéciales
+
+// === Une fonction par attaque spéciale ===
+// Ces fonctions sont appelées quand une attaque spéciale est utilisée.
 void attaque_affutage_mortal(Fighter*, Fighter*);
 void attaque_assaut_tranchant(Fighter*, Fighter*);
 void attaque_eveil_du_sabre(Fighter*, Fighter*);
@@ -64,9 +69,11 @@ void attaque_mur_vivant(Fighter*, Fighter*);
 void attaque_barriere_de_pierre(Fighter*, Fighter*);
 void attaque_rugissement_d_acier(Fighter*, Fighter*);
 
+// === Déclarations externes des attaques ===
+// Ces objets AttaqueSpecial sont définis dans le .c pour chaque attaque.
 extern AttaqueSpecial useAttaque;
 extern AttaqueSpecial useDefense;
-// Déclarations externes des attaques spéciales
+
 extern AttaqueSpecial affutageMortal;
 extern AttaqueSpecial assautTranchant;
 extern AttaqueSpecial eveilDuSabre;

@@ -3,20 +3,23 @@
 #include "son.h"
 #include "attaque.h"
 
-
 #include <string.h>
 #include <time.h>
 #include <stdbool.h>
 
-
-
+// Déclaration externe de la fonction d'affichage de la fiche perso
 extern Page afficher_fiche_personnage(SDL_Renderer* rendu, Fighter perso, int joueur);
 
-
+// Tableau global contenant les 6 personnages sélectionnés (3 par équipe)
 Fighter persoChoisi[6];
+
+// Indices des personnages sélectionnés (utilisé pour retrouver leur image ou leur nom)
 int index_selection[6];
 
+// Fonction de nettoyage de fin de programme (libérations mémoire, sons, textures...)
 void cleanup(void);
+
+// Fonction principale du jeu : gère les combats et les tours
 void runGame(SDL_Renderer* rendu);
 
 

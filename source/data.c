@@ -5,9 +5,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+// === Tableau global de toutes les attaques disponibles dans le jeu ===
 AttaqueSpecial* toutes_les_attaques[NB_ATTAQUES_TOTAL];
 
-//attaque classique et defenzse
+// === Attaque classique et défense de base ===
 AttaqueSpecial useAttaque = {
     .nom = "attaque",
     .description = "Une simple attaque physique",
@@ -23,8 +25,8 @@ AttaqueSpecial useDefense = {
     .type = 2,
 };
 
-// Le tableau global de tous les personnages
-
+// === Définition des attaques spéciales ===
+// Chaque AttaqueSpecial contient : nom, description, identifiant, coût en PT, type d'effet
 AttaqueSpecial affutageMortal = {
     .nom = "affûtage mortal",
     .description = "Applique Saignement sur attaques normales pendant 3 tours.",
@@ -218,7 +220,9 @@ AttaqueSpecial rugissementDacier ={
     .type = 5,
 };
 
-//============================== figthrtertee =======================================
+// ===========================================================================
+// === Déclaration de tous les personnages jouables avec leurs statistiques ===
+// ===========================================================================
 
 Fighter zoro={
     .nom ="zoro",
@@ -330,6 +334,7 @@ Fighter incassable={
 
 
 
+// === Fonction pour récupérer un personnage par son index ===
 
 Fighter get_fighter_depuis_nom(int index) {
     switch (index) {
@@ -346,6 +351,7 @@ Fighter get_fighter_depuis_nom(int index) {
 }
 
 
+// === Déclaration des variables globales du jeu ===
 Joueur equipe1;
 Partie partieActuelle;
 

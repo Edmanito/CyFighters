@@ -10,36 +10,38 @@
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_mixer.h>
 
+// Fenêtre globale accessible ailleurs
 SDL_Window* fenetre;
 
 int main(int argc, char* argv[]) {
+    // Tableaux pour stocker les images des personnages sélectionnés
     SDL_Texture* selections_j1[NB_PERSOS_EQUIPE] = { NULL };
     SDL_Texture* selections_j2[NB_PERSOS_EQUIPE] = { NULL };
-    Page page = PAGE_MENU;
-    int quit = 0;
-    int musique_menu_jouee = 0;
 
-    // SDL
+    Page page = PAGE_MENU;       // Page actuelle
+    int quit = 0;                // Flag de sortie
+    int musique_menu_jouee = 0; // Pour ne pas relancer la musique plusieurs fois
+
+    // === Initialisation SDL ===
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
         printf("Erreur SDL : %s\n", SDL_GetError());
         return 1;
     }
 
-    // TTF
+    // === Initialisation TTF (polices) ===
     if (TTF_Init() != 0) {
         printf("Erreur TTF : %s\n", TTF_GetError());
         SDL_Quit();
         return 1;
     }
-    charger_polices();
+    charger_polices(); // Charge policePrincipale / policePetite
 
-    // MIXER
+    // === Initialisation Audio (SDL_mixer) ===
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
         SDL_Log("Erreur Audio (ignorée) : %s", Mix_GetError());
-        
     }
 
-    // Fenêtre
+    // === Création de la fenêtre ===
     fenetre = SDL_CreateWindow("Project Shōnen Smash", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                LARGEUR_FENETRE, HAUTEUR_FENETRE, SDL_WINDOW_SHOWN);
     if (!fenetre) {
@@ -51,7 +53,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Renderer
+    // === Création du rendu (renderer SDL) ===
     SDL_Renderer* rendu = SDL_CreateRenderer(fenetre, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!rendu) {
         printf("Erreur renderer : %s\n", SDL_GetError());
@@ -63,12 +65,12 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    srand(time(NULL));
+    srand(time(NULL)); // Initialisation de la seed aléatoire
 
-    // Chargement
+    // === Écran de chargement ===
     page = afficher_chargement(rendu);
 
-    // Boucle principale
+    // === Boucle principale ===
     while (!quit) {
         switch (page) {
             case PAGE_MENU:
@@ -88,12 +90,17 @@ int main(int argc, char* argv[]) {
                 break;
 
             case PAGE_SELECTION_PERSO: {
+                // Sauvegarde des sélections précédentes
                 SDL_Texture* old_j1[NB_PERSOS_EQUIPE] = { selections_j1[0], selections_j1[1], selections_j1[2] };
                 SDL_Texture* old_j2[NB_PERSOS_EQUIPE] = { selections_j2[0], selections_j2[1], selections_j2[2] };
 
                 page = afficher_selection_perso(rendu, selections_j1, selections_j2);
+
+                // Confirmation des sélections
                 if (page == PAGE_CONFIRMATION_PERSO) {
                     page = afficher_confirmation_perso(rendu, selections_j1, selections_j2);
+
+                    // Si on retourne en arrière, restaurer les anciennes textures
                     if (page == PAGE_SELECTION_PERSO) {
                         for (int i = 0; i < NB_PERSOS_EQUIPE; i++) {
                             selections_j1[i] = old_j1[i];
@@ -105,7 +112,7 @@ int main(int argc, char* argv[]) {
             }
 
             case PAGE_COMBAT:
-                musique_menu_jouee = 0;
+                musique_menu_jouee = 0; // Permettra de relancer la musique à nouveau plus tard
                 page = afficher_jeu(rendu, selections_j1, selections_j2);
                 break;
 
@@ -129,17 +136,17 @@ int main(int argc, char* argv[]) {
                 break;
         }
 
-        SDL_Delay(5);
+        SDL_Delay(5); // Petite pause entre les frames
     }
 
-    // Libération des textures
+    // === Nettoyage des textures des personnages sélectionnés ===
     for (int i = 0; i < NB_PERSOS_EQUIPE; i++) {
         if (selections_j1[i]) SDL_DestroyTexture(selections_j1[i]);
         if (selections_j2[i]) SDL_DestroyTexture(selections_j2[i]);
     }
 
+    // === Fermeture / Libération mémoire ===
     arreter_musique();
-
     SDL_DestroyRenderer(rendu);
     SDL_DestroyWindow(fenetre);
     Mix_CloseAudio();

@@ -8,14 +8,14 @@
 #include <SDL2/SDL_mixer.h>
 
 // === Constantes générales ===
-#define NB_PERSOS_EQUIPE 3
+#define NB_PERSOS_EQUIPE 3 // Nombre de personnages par équipe
 #define MAX_NOM_ATTAQUE 50
 #define MAX_DESCRIPTION 300
 #define MAX_SPECIAL 3
 #define MAX_EFFETS 3
 #define MAX_NOM_PERSO 50
 
-// === Éléments ===
+// === Types d'élément associés aux personnages/attaques ===
 typedef enum {
     ELEMENT_NONE,
     ELEMENT_CRISTAL,
@@ -27,7 +27,8 @@ typedef enum {
     ELEMENT_OMBRE
 } ElementType;
 
-// === ID des attaques spéciales ===
+// === Identifiants uniques pour les attaques spéciales ===
+// Doivent correspondre aux fonctions et aux objets AttaqueSpecial du projet
 typedef enum {
     ATTAQUE_BASIQUE = 0,
     DEFENSE,
@@ -58,47 +59,49 @@ typedef enum {
     NB_ATTAQUES_TOTAL
 } AttaqueID;
 
-// === Structures principales ===
+// === Données d'une attaque spéciale ===
 typedef struct {
     char nom[MAX_NOM_ATTAQUE];
     char description[MAX_DESCRIPTION];
-    int id;
-    int cout;
-    int type;
+    int id;    // Doit correspondre à une des valeurs d’AttaqueID
+    int cout;  // Coût en points
+    int type;  // Type d'effet, pour tri ou logique personnalisée
 } AttaqueSpecial;
 
-
-
+// === Données d’un combattant (joueur ou IA) ===
 typedef struct {
     char nom[MAX_NOM_PERSO];
     int actu_pv, max_pv;
     int attaque, defense, agilite, vitesse, magie;
-    int pt;
-    int statutEffet;        // 1 = Saignement, 2 = Brulur, 3 = Boost def, 4 = Boost attaque, 5 = Boost vitesse, 6 = Nerf def,
-                            // 7 = Nerf attaque , 8 = Nerf vitesse, 9 = Nerf Agilité, 10 = Boost Agilité, 11 = Gel; 12 = paralysie, 13 = defense classique
-    int dureeEffet;         // durée en tours restants
-    int protegePar; // -1 si pas protégé, sinon contient l'index du protecteur (entre 0 et 5)   Pour Incassable
+    int pt; // points à dépenser pour les attaques
 
-    int element;
+    // Effet de statut actif (voir code pour signification des valeurs)
+    int statutEffet;
+    int dureeEffet;
+    int protegePar; // -1 si non protégé, sinon index du protecteur (spécifique à certaines compétences)
+
+    int element; // Utilise ElementType
     AttaqueSpecial spe_atq1, spe_atq2, spe_atq3;
 } Fighter;
 
+// === Structure pour stocker les 3 combattants d’un joueur ===
 typedef struct {
     Fighter fighter1, fighter2, fighter3;
 } Joueur;
 
+// === Informations d’une partie en cours ===
 typedef struct {
     Joueur joueur1, joueur2;
-    int perso_actif;
-    int tour;
+    int perso_actif; // index du combattant en action
+    int tour;        // numéro du tour actuel
     int equipeQuiCommence;
-    bool fin;
-    int mapType;
-    bool nuit;
-    int iaDifficulte;
+    bool fin;        // indique si la partie est finie
+    int mapType;     // type de map (modificateurs)
+    bool nuit;       // effet de nuit
+    int iaDifficulte;// 0 = pas d’IA, 1 = facile, etc.
 } Partie;
 
-
+// === Bonus d’environnement (ex : arène avantageuse) ===
 typedef struct {
     int bonus_attaque;
     int bonus_defense;
@@ -107,15 +110,16 @@ typedef struct {
     int bonus_pv;
 } BonusMap;
 
+// === Sauvegarde d’une attaque à effectuer (utile pour IA, etc.) ===
 typedef struct {
     int idAttaque;
-    int utilisateurNum; 
+    int utilisateurNum;
     int utilisateurEquipe;
-    
-    int cibleNum; 
+    int cibleNum;
     int cibleEquipe;
 } AttaqueSauvegarde;
 
+// === Structure pour un bouton SDL interactif ===
 typedef struct {
     SDL_Rect rect;
     SDL_Color baseColor, hoverColor;
@@ -123,7 +127,7 @@ typedef struct {
     const char* text;
 } Button;
 
-// === Fonctions utilitaires ===
+// === Fonctions utilitaires utilisées pendant le combat ===
 Fighter appliquer_modificateurs(Fighter* original);
 Fighter* get_fighter(int numero);
 Fighter* get_fighter_by_index(int index);
@@ -133,24 +137,25 @@ Fighter creer_fighter(const char* nom, int actu_pv, int max_pv, int attaque, int
 Fighter get_fighter_depuis_nom(int index);
 void appliquer_buffs(Fighter* perso, BonusMap bonus);
 bool equipe_est_morte(int equipe);
-void runGame(SDL_Renderer* rendu);
-
+void runGame(SDL_Renderer* rendu); // Lancement de la boucle de jeu principale
 
 // === Variables globales ===
-extern int idIncassble;
-extern int dureeMur;
+extern int idIncassble; // Index du personnage "Incassable"
+extern int dureeMur;    // Durée de son mur protecteur
 extern SDL_Window* fenetre;
 extern int screenWidth;
 extern int screenHeight;
 extern Partie partieActuelle;
 extern Fighter persoChoisi[];
+
+// Tableau global d’attaques et de fonctions associées
 extern AttaqueSpecial* toutes_les_attaques[NB_ATTAQUES_TOTAL];
 extern void (*fonctions_attaques[NB_ATTAQUES_TOTAL])(Fighter*, Fighter*);
 
 // === Personnages disponibles ===
 extern Fighter darkshadow, hitsugaya, incassable, katara, kirua;
 extern Fighter rengoku, temari, zoro, lukas;
-extern Joueur equipe1;
+extern Joueur equipe1; // équipe de test ?
 
 // === Attaques de test ===
 extern AttaqueSpecial Test1, Test2, Test3;

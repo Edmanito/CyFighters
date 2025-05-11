@@ -12,7 +12,6 @@ int volume_global = 20; // entre 0 et 128
 int musique_actuelle = 1; // 1, 2 ou 3
 
 
-//test//
 // Variables globales réelles
 int mode_choisi = 0;
 int chemin_retour = 0;
@@ -22,7 +21,6 @@ int musiqueRes=1;
 
 
 
-//lol
 
 
 
@@ -30,16 +28,18 @@ int musiqueRes=1;
 
 
 
-// === CHARGEMENT ===
+// Affiche une page de chargement avec une animation de barre de progression
 Page afficher_chargement(SDL_Renderer *rendu) {
+    // Chargement du fond
     SDL_Surface *image_fond = IMG_Load("ressource/image/fonds/fond_chargement.png");
     SDL_Texture *fond = SDL_CreateTextureFromSurface(rendu, image_fond);
     SDL_FreeSurface(image_fond);
 
+    // Chargement de la police pour afficher le texte
     TTF_Font *police = TTF_OpenFont("ressource/langue/police/arial.ttf", 28);
     SDL_Color blanc = {255, 255, 255, 255};
 
-    // === Zone de la barre de chargement (étendue) ===
+    // Définition de la zone de la barre de chargement
     int marge_horizontale = 30;
     SDL_Rect zone_barre = {
         marge_horizontale,
@@ -48,6 +48,7 @@ Page afficher_chargement(SDL_Renderer *rendu) {
         30
     };
 
+    // Zone du texte affiché sous la barre
     SDL_Rect zone_texte = {
         zone_barre.x,
         zone_barre.y + 40,
@@ -55,32 +56,40 @@ Page afficher_chargement(SDL_Renderer *rendu) {
         30
     };
 
+    // Création du texte "Chargement en cours..."
     SDL_Surface* surf_texte = TTF_RenderUTF8_Solid(police, getTexte("chargement en cours"), blanc);
     SDL_Texture *texture_texte = SDL_CreateTextureFromSurface(rendu, surf_texte);
     SDL_FreeSurface(surf_texte);
 
-    int nb_blocs = 50, marge = 2;
+    // Paramètres de la barre
+    int nb_blocs = 50;  // nombre de blocs dans la barre
+    int marge = 2;      // espace entre les blocs
     int largeur_bloc = (zone_barre.w - (nb_blocs - 1) * marge) / nb_blocs;
 
+    // Affichage progressif de la barre de chargement
     for (int i = 0; i <= nb_blocs; i++) {
         SDL_RenderClear(rendu);
         SDL_RenderCopy(rendu, fond, NULL, NULL);
 
-        // --- Dégradé rouge foncé → orange → vert ---
+        // Couleur dégradée rouge → vert selon la progression
         int r, g;
         if (i <= nb_blocs / 2) {
-            float t = (float)i / (nb_blocs / 2);
-            r = 128 + (int)(127 * t);  // 128 → 255
-            g = (int)(128 * t);        // 0 → 128
+            float interpolation = (float)i / (nb_blocs / 2);
+            r = 128 + (int)(127 * interpolation);  // passe de 128 à 255
+            g = (int)(128 * interpolation);        // passe de 0 à 128
         } else {
-            float t = (float)(i - nb_blocs / 2) / (nb_blocs / 2);
-            r = 255 - (int)(255 * t);  // 255 → 0
-            g = 128 + (int)(127 * t);  // 128 → 255
+            float interpolation = (float)(i - nb_blocs / 2) / (nb_blocs / 2);
+            r = 255 - (int)(255 * interpolation);  // passe de 255 à 0
+            g = 128 + (int)(127 * interpolation);  // passe de 128 à 255
         }
+
+        // Limites de sécurité sur les couleurs
         if (r < 0) r = 0;
         if (g > 255) g = 255;
+
         SDL_SetRenderDrawColor(rendu, r, g, 0, 255);
 
+        // Affichage des blocs
         for (int j = 0; j < i; j++) {
             SDL_Rect bloc = {
                 zone_barre.x + j * (largeur_bloc + marge),
@@ -91,9 +100,11 @@ Page afficher_chargement(SDL_Renderer *rendu) {
             SDL_RenderFillRect(rendu, &bloc);
         }
 
+        // Affiche le texte sous la barre
         SDL_RenderCopy(rendu, texture_texte, NULL, &zone_texte);
         SDL_RenderPresent(rendu);
 
+        // Vitesse d’animation : ralentit vers la fin
         if (i > nb_blocs * 0.95)
             SDL_Delay(300);
         else if (i > nb_blocs * 0.85)
@@ -104,9 +115,12 @@ Page afficher_chargement(SDL_Renderer *rendu) {
             SDL_Delay(20);
     }
 
+    // Nettoyage
     SDL_DestroyTexture(fond);
     SDL_DestroyTexture(texture_texte);
     TTF_CloseFont(police);
+
+    // Passe à la page histoire après le chargement
     return PAGE_HISTOIRE;
 }
 
@@ -117,10 +131,12 @@ Page afficher_chargement(SDL_Renderer *rendu) {
 
 
 
-// === HISTOIRE ===
+
+// Affiche une cinématique d'intro avec 5 phrases qui apparaissent progressivement à l'écran
 Page afficher_histoire(SDL_Renderer* rendu) {
     #define NB_PHRASES 5
 
+    // Phrases à afficher
     const char* phrases[NB_PHRASES] = {
         "Dans un monde divisé par les royaumes...",
         "Un phénomène étrange a bouleversé l’équilibre.",
@@ -129,45 +145,53 @@ Page afficher_histoire(SDL_Renderer* rendu) {
         "Bienvenue dans Project Shōnen Smash."
     };
 
-    char affichage[NB_PHRASES][256] = {{0}};
-    int lettres[NB_PHRASES] = {0};
+    char affichage[NB_PHRASES][256] = {{0}};  // Phrases partiellement affichées
+    int lettres[NB_PHRASES] = {0};           // Nb de lettres déjà affichées
 
+    // Fond d'écran
     SDL_Texture* fond = IMG_LoadTexture(rendu, "ressource/image/fonds/fond_histoire.png");
 
+    // Police + couleur
     TTF_Font* police = TTF_OpenFont("ressource/langue/police/arial.ttf", 32);
     SDL_Color blanc = {255, 255, 255, 255};
 
+    // Bouton "passer"
     SDL_Texture* skip_btn = IMG_LoadTexture(rendu, "ressource/image/utilité/avance.png");
     SDL_Rect skip_rect = {LARGEUR_FENETRE - 120, 20, 80, 80};
 
+    // Son joué quand une phrase commence à apparaître
     Mix_Chunk* son_phrase = Mix_LoadWAV("ressource/musique/ogg/phrase.ogg");
     if (!son_phrase) SDL_Log("ERREUR chargement son phrase : %s", Mix_GetError());
 
-    Uint32 last_char = SDL_GetTicks();
+    Uint32 last_char = SDL_GetTicks();  // Temps d'affichage de la dernière lettre
     SDL_Event event;
     int phrase = 0;
 
+    // Affichage des 5 phrases, une à une
     while (phrase < NB_PHRASES) {
         Uint32 now = SDL_GetTicks();
 
+        // Ajout d’une lettre toutes les 40 ms
         if (lettres[phrase] < strlen(phrases[phrase]) && now - last_char > 40) {
             lettres[phrase]++;
             last_char = now;
             memset(affichage[phrase], 0, sizeof(affichage[phrase]));
             strncpy(affichage[phrase], phrases[phrase], lettres[phrase]);
 
+            // Lance un son au début de chaque nouvelle phrase
             if (lettres[phrase] == 1 && son_phrase && !phraseJouee) {
                 int volume = 30 + rand() % 35;
                 Mix_VolumeChunk(son_phrase, volume);
                 Mix_PlayChannel(-1, son_phrase, 0);
                 phraseJouee = true;
             }
-            
         }
 
+        // Affichage graphique
         SDL_RenderClear(rendu);
         if (fond) SDL_RenderCopy(rendu, fond, NULL, NULL);
 
+        // Affiche toutes les phrases déjà commencées
         for (int i = 0; i <= phrase; i++) {
             if (lettres[i] > 0) {
                 SDL_Surface* surf = TTF_RenderUTF8_Solid(police, affichage[i], blanc);
@@ -186,18 +210,22 @@ Page afficher_histoire(SDL_Renderer* rendu) {
             }
         }
 
+        // Bouton de skip
         if (skip_btn) SDL_RenderCopy(rendu, skip_btn, NULL, &skip_rect);
         SDL_RenderPresent(rendu);
 
+        // Pause entre deux phrases
         if (lettres[phrase] == strlen(phrases[phrase])) {
             SDL_Delay(1000);
             phrase++;
             phraseJouee = false;
         }
 
+        // Gère les clics
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT)
                 return PAGE_QUITTER;
+
             if (event.type == SDL_MOUSEBUTTONDOWN) {
                 int x = event.button.x, y = event.button.y;
                 if (x >= skip_rect.x && x <= skip_rect.x + skip_rect.w &&
@@ -209,12 +237,15 @@ Page afficher_histoire(SDL_Renderer* rendu) {
         }
     }
 
+    // Nettoyage
     if (fond) SDL_DestroyTexture(fond);
     if (skip_btn) SDL_DestroyTexture(skip_btn);
     if (son_phrase) Mix_FreeChunk(son_phrase);
     TTF_CloseFont(police);
+
     return PAGE_MENU;
 }
+
 
 
 
@@ -235,26 +266,38 @@ Page afficher_histoire(SDL_Renderer* rendu) {
 
 // === MENU PRINCIPAL ===
 Page afficher_menu(SDL_Renderer* rendu) {
+    // Joue la musique du menu une seule fois
     if (musiqueRes == 1) {
         jouerMusique("ressource/musique/ogg/menu/menu_1.ogg", 20);
         musiqueRes = 0;
     }
 
+    // Chargement des images (fond, cadres, icônes)
     SDL_Texture* fond = IMG_LoadTexture(rendu, "ressource/image/fonds/fond_menu.png");
     SDL_Texture* cadre_titre = IMG_LoadTexture(rendu, "ressource/image/cadres/cadre_titre.png");
     SDL_Texture* cadre_bouton = IMG_LoadTexture(rendu, "ressource/image/cadres/cadre_texte.png");
     SDL_Texture* image_trophee = IMG_LoadTexture(rendu, "ressource/image/utilité/trophee.png");
     SDL_Texture* image_manette = IMG_LoadTexture(rendu, "ressource/image/utilité/manette.png");
 
+    // Police et couleur des textes
     TTF_Font* police = TTF_OpenFont("ressource/langue/police/arial.ttf", 40);
     SDL_Color noir = {0, 0, 0, 255};
 
+    // Dimensions pour les titres et boutons
     int tailleTitre = 250;
     int tailleBouton = 190;
     int largeurBouton = 280;
     int largeurTitre = 500;
 
-    SDL_Rect zone_titre = {LARGEUR_FENETRE / 2 - largeurTitre / 2, 10, largeurTitre, tailleTitre};
+    // Positionnement du cadre de titre
+    SDL_Rect zone_titre = {
+        LARGEUR_FENETRE / 2 - largeurTitre / 2,
+        10,
+        largeurTitre,
+        tailleTitre
+    };
+
+    // Boutons "Jouer", "Options", "Quitter"
     SDL_Rect boutons[3] = {
         {LARGEUR_FENETRE / 2 - largeurBouton / 2, 200, largeurBouton, tailleBouton},
         {LARGEUR_FENETRE / 2 - largeurBouton / 2, 360, largeurBouton, tailleBouton},
@@ -262,13 +305,16 @@ Page afficher_menu(SDL_Renderer* rendu) {
     };
     const char* ids_textes[] = {"jouer", "options", "quitter"};
 
+    // Position des icônes trophée et manette
     SDL_Rect rect_trophee = {LARGEUR_FENETRE - 120, HAUTEUR_FENETRE - 140, 100, 100};
     SDL_Rect rect_manette = {LARGEUR_FENETRE - 120, HAUTEUR_FENETRE - 260, 100, 100};
 
+    // Affichage de base
     SDL_RenderClear(rendu);
     SDL_RenderCopy(rendu, fond, NULL, NULL);
     SDL_RenderCopy(rendu, cadre_titre, NULL, &zone_titre);
 
+    // Affiche les 3 boutons texte
     for (int i = 0; i < 3; i++) {
         SDL_RenderCopy(rendu, cadre_bouton, NULL, &boutons[i]);
         SDL_Surface* surf = TTF_RenderUTF8_Solid(police, getTexte(ids_textes[i]), noir);
@@ -284,14 +330,17 @@ Page afficher_menu(SDL_Renderer* rendu) {
         SDL_DestroyTexture(tex);
     }
 
+    // Affiche les images décoratives
     SDL_RenderCopy(rendu, image_trophee, NULL, &rect_trophee);
     SDL_RenderCopy(rendu, image_manette, NULL, &rect_manette);
     SDL_RenderPresent(rendu);
 
+    // Boucle d’attente des événements
     SDL_Event event;
     while (1) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
+                // Libère les ressources si fermeture
                 TTF_CloseFont(police);
                 SDL_DestroyTexture(fond);
                 SDL_DestroyTexture(cadre_titre);
@@ -304,6 +353,7 @@ Page afficher_menu(SDL_Renderer* rendu) {
             if (event.type == SDL_MOUSEBUTTONDOWN) {
                 int x = event.button.x, y = event.button.y;
 
+                // Clic sur "Jouer"
                 if (x >= boutons[0].x && x <= boutons[0].x + boutons[0].w &&
                     y >= boutons[0].y && y <= boutons[0].y + boutons[0].h) {
                     TTF_CloseFont(police);
@@ -315,6 +365,7 @@ Page afficher_menu(SDL_Renderer* rendu) {
                     return PAGE_SELEC_MODE;
                 }
 
+                // Clic sur "Options"
                 if (x >= boutons[1].x && x <= boutons[1].x + boutons[1].w &&
                     y >= boutons[1].y && y <= boutons[1].y + boutons[1].h) {
                     TTF_CloseFont(police);
@@ -326,6 +377,7 @@ Page afficher_menu(SDL_Renderer* rendu) {
                     return PAGE_OPTIONS;
                 }
 
+                // Clic sur "Quitter"
                 if (x >= boutons[2].x && x <= boutons[2].x + boutons[2].w &&
                     y >= boutons[2].y && y <= boutons[2].y + boutons[2].h) {
                     TTF_CloseFont(police);
@@ -340,7 +392,7 @@ Page afficher_menu(SDL_Renderer* rendu) {
         }
     }
 
-    // Nettoyage (normalement jamais atteint)
+    // Code jamais atteint
     TTF_CloseFont(police);
     SDL_DestroyTexture(fond);
     SDL_DestroyTexture(cadre_titre);
@@ -353,36 +405,28 @@ Page afficher_menu(SDL_Renderer* rendu) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 Page afficher_credit(SDL_Renderer* rendu, Page page_prec);
+
+
+
+
+
 
 
 // === OPTIONS ===
 Page afficher_options(SDL_Renderer* rendu, Page page_prec) {
+    // Chargement des textures du fond et des éléments visuels
     SDL_Texture* fond = IMG_LoadTexture(rendu, "ressource/image/fonds/fond_menu.png");
     SDL_Texture* cadre_bouton = IMG_LoadTexture(rendu, "ressource/image/cadres/cadre_texte.png");
     SDL_Texture* bouton_retour = IMG_LoadTexture(rendu, "ressource/image/utilité/retour.png");
 
+    // Drapeaux pour le choix de la langue
     SDL_Texture* drapeauAllemand = IMG_LoadTexture(rendu, "ressource/image/utilité/drapeau/drapeauAllemand.png");
     SDL_Texture* drapeauAnglais  = IMG_LoadTexture(rendu, "ressource/image/utilité/drapeau/drapeauAnglais.png");
     SDL_Texture* drapeauEspagnol = IMG_LoadTexture(rendu, "ressource/image/utilité/drapeau/drapeauEspagnol.png");
     SDL_Texture* drapeauFrancais = IMG_LoadTexture(rendu, "ressource/image/utilité/drapeau/drapeauFrancais.png");
 
+    // Chargement des miniatures associées aux musiques de menu
     SDL_Texture* images_musiques[6];
     for (int i = 0; i < 6; i++) {
         char chemin[128];
@@ -391,73 +435,61 @@ Page afficher_options(SDL_Renderer* rendu, Page page_prec) {
     }
 
     const char* ids_textes[] = {"credit", "langue", "volume", "musique"};
-
     SDL_Color blanc = {255, 255, 255, 255};
     TTF_Font* police = TTF_OpenFont("ressource/langue/police/arial.ttf", 40);
 
-    int tailleBouton = 250;
-    int largeurBouton = 200;
-
+    // Définition des cadres des 4 lignes d’options
     SDL_Rect boutons[4] = {
-        {0, -50, largeurBouton, tailleBouton},
-        {0, 100, largeurBouton, tailleBouton},
-        {0, 250, largeurBouton, tailleBouton},
-        {0, 400, largeurBouton, tailleBouton}
+        {0, -50, 200, 250},
+        {0, 100, 200, 250},
+        {0, 250, 200, 250},
+        {0, 400, 200, 250}
     };
 
+    // Position de la barre de volume
     SDL_Rect barre = {
         (LARGEUR_FENETRE - 300) / 2,
         boutons[2].y + 100,
         300, 30
     };
 
-    SDL_Rect retour_rect = {20, HAUTEUR_FENETRE - 100, 80, 80};
+    SDL_Rect retour_rect = {20, HAUTEUR_FENETRE - 100, 80, 80}; // Position du bouton retour
 
+    // Positionnement des vignettes musicales (2 lignes de 3 vignettes)
     SDL_Rect musiques[6];
     for (int i = 0; i < 6; i++) {
-        int ligne = i / 3;
-        int colonne = i % 3;
-
-        int largeur = 200;
-        int hauteur = 150;
-        int espacement_base = 280;
-        int decalage_col_1 = 90;
-        int decalage_col_2 = 150;
-
-        musiques[i].w = largeur;
-        musiques[i].h = hauteur;
-
-        int base_x = LARGEUR_FENETRE / 2 - (espacement_base * 3) / 2;
-
-        musiques[i].x = base_x + colonne * espacement_base;
-        if (colonne == 1) musiques[i].x += decalage_col_1;
-        if (colonne == 2) musiques[i].x += decalage_col_2;
-
-        musiques[i].y = barre.y + 100 + ligne * (hauteur + 30);
-
+        int ligne = i / 3, colonne = i % 3;
+        musiques[i].w = 200;
+        musiques[i].h = 150;
+        int base_x = LARGEUR_FENETRE / 2 - (280 * 3) / 2;
+        musiques[i].x = base_x + colonne * 280;
+        if (colonne == 1) musiques[i].x += 90;
+        if (colonne == 2) musiques[i].x += 150;
+        musiques[i].y = barre.y + 100 + ligne * (150 + 30);
         if (ligne == 0) musiques[i].y -= 50;
         if (ligne == 1) musiques[i].y -= 80;
     }
 
-    int drapeau_taille = 110;
-    int espacement = 60;
+    // Position des drapeaux de langue
     SDL_Rect drapeaux[4];
     int base_x = 350;
-    int base_y = boutons[1].y + (boutons[1].h - drapeau_taille) / 2;
+    int base_y = boutons[1].y + (boutons[1].h - 110) / 2;
     for (int i = 0; i < 4; i++) {
-        drapeaux[i].x = base_x + i * (drapeau_taille + espacement);
+        drapeaux[i].x = base_x + i * (110 + 60);
         drapeaux[i].y = base_y;
-        drapeaux[i].w = drapeau_taille;
-        drapeaux[i].h = drapeau_taille;
+        drapeaux[i].w = 110;
+        drapeaux[i].h = 110;
     }
 
-    bool curseur_actif = false;
+    bool curseur_actif = false; // Pour glisser le volume en continu
     SDL_Event event;
 
+    // Boucle d’affichage
     while (1) {
         SDL_RenderClear(rendu);
         SDL_RenderCopy(rendu, fond, NULL, NULL);
 
+        // Affichage des cadres et textes des 4 boutons
         for (int i = 0; i < 4; i++) {
             SDL_RenderCopy(rendu, cadre_bouton, NULL, &boutons[i]);
             SDL_Surface* surf = TTF_RenderUTF8_Solid(police, getTexte(ids_textes[i]), blanc);
@@ -473,20 +505,24 @@ Page afficher_options(SDL_Renderer* rendu, Page page_prec) {
             SDL_DestroyTexture(tex);
         }
 
+        // Affichage des drapeaux
         SDL_RenderCopy(rendu, drapeauFrancais, NULL, &drapeaux[0]);
         SDL_RenderCopy(rendu, drapeauAnglais,  NULL, &drapeaux[1]);
         SDL_RenderCopy(rendu, drapeauEspagnol, NULL, &drapeaux[2]);
         SDL_RenderCopy(rendu, drapeauAllemand, NULL, &drapeaux[3]);
 
-        SDL_Rect fond_barre = {barre.x - 4, barre.y - 4, barre.w + 8, barre.h + 8};
-        SDL_SetRenderDrawColor(rendu, 20, 20, 20, 255); SDL_RenderFillRect(rendu, &fond_barre);
-        SDL_SetRenderDrawColor(rendu, 40, 40, 40, 255); SDL_RenderFillRect(rendu, &barre);
+        // Affichage barre volume (fond + niveau + curseur)
         float ratio = volume_global / 128.0f;
-        int r = (int)(255 * (1 - ratio));
-        int g = (int)(255 * ratio);
-        SDL_SetRenderDrawColor(rendu, r, g, 60, 255);
+        SDL_SetRenderDrawColor(rendu, 20, 20, 20, 255); // fond noir
+        SDL_RenderFillRect(rendu, &(SDL_Rect){barre.x - 4, barre.y - 4, barre.w + 8, barre.h + 8});
+        SDL_SetRenderDrawColor(rendu, 40, 40, 40, 255); // barre grise
+        SDL_RenderFillRect(rendu, &barre);
+        int r = (int)(255 * (1 - ratio)), g = (int)(255 * ratio);
+        SDL_SetRenderDrawColor(rendu, r, g, 60, 255); // barre verte-rouge selon niveau
         SDL_Rect niveau = {barre.x, barre.y, volume_global * barre.w / 128, barre.h};
         SDL_RenderFillRect(rendu, &niveau);
+
+        // Affichage du curseur blanc avec effet de halo
         int curseur_x = barre.x + niveau.w;
         int curseur_y = barre.y + barre.h / 2;
         for (int i = 10; i >= 1; i--) {
@@ -498,6 +534,7 @@ Page afficher_options(SDL_Renderer* rendu, Page page_prec) {
         SDL_Rect curseur = {curseur_x - 4, curseur_y - 4, 8, 8};
         SDL_RenderFillRect(rendu, &curseur);
 
+        // Texte du pourcentage de volume
         char texte_volume[16];
         sprintf(texte_volume, "%d %%", volume_global * 100 / 128);
         SDL_Surface* surf_volume = TTF_RenderUTF8_Solid(police, texte_volume, blanc);
@@ -515,6 +552,7 @@ Page afficher_options(SDL_Renderer* rendu, Page page_prec) {
         SDL_FreeSurface(surf_volume);
         SDL_DestroyTexture(tex_volume);
 
+        // Affichage des vignettes musicales
         for (int i = 0; i < 6; i++) {
             SDL_RenderCopy(rendu, images_musiques[i], NULL, &musiques[i]);
         }
@@ -522,6 +560,7 @@ Page afficher_options(SDL_Renderer* rendu, Page page_prec) {
         SDL_RenderCopy(rendu, bouton_retour, NULL, &retour_rect);
         SDL_RenderPresent(rendu);
 
+        // Gestion des clics
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 for (int i = 0; i < 6; i++) SDL_DestroyTexture(images_musiques[i]);
@@ -531,7 +570,7 @@ Page afficher_options(SDL_Renderer* rendu, Page page_prec) {
             if (event.type == SDL_MOUSEBUTTONDOWN) {
                 int x = event.button.x, y = event.button.y;
 
-                // Bouton crédit (en haut)
+                // Clic sur crédit
                 if (x >= boutons[0].x && x <= boutons[0].x + boutons[0].w &&
                     y >= boutons[0].y && y <= boutons[0].y + boutons[0].h) {
                     Page retour = afficher_credit(rendu, PAGE_OPTIONS);
@@ -541,12 +580,14 @@ Page afficher_options(SDL_Renderer* rendu, Page page_prec) {
                     }
                 }
 
+                // Clic sur retour
                 if (x >= retour_rect.x && x <= retour_rect.x + retour_rect.w &&
                     y >= retour_rect.y && y <= retour_rect.y + retour_rect.h) {
                     for (int i = 0; i < 6; i++) SDL_DestroyTexture(images_musiques[i]);
                     return page_prec;
                 }
 
+                // Clic dans la barre de volume
                 if (x >= barre.x && x <= barre.x + barre.w &&
                     y >= barre.y && y <= barre.y + barre.h) {
                     volume_global = (x - barre.x) * 128 / barre.w;
@@ -556,6 +597,7 @@ Page afficher_options(SDL_Renderer* rendu, Page page_prec) {
                     curseur_actif = true;
                 }
 
+                // Clic sur drapeau (changer langue)
                 for (int i = 0; i < 4; i++) {
                     if (x >= drapeaux[i].x && x <= drapeaux[i].x + drapeaux[i].w &&
                         y >= drapeaux[i].y && y <= drapeaux[i].y + drapeaux[i].h) {
@@ -563,6 +605,7 @@ Page afficher_options(SDL_Renderer* rendu, Page page_prec) {
                     }
                 }
 
+                // Clic sur une des musiques
                 for (int i = 0; i < 6; i++) {
                     if (x >= musiques[i].x && x <= musiques[i].x + musiques[i].w &&
                         y >= musiques[i].y && y <= musiques[i].y + musiques[i].h) {
@@ -575,9 +618,7 @@ Page afficher_options(SDL_Renderer* rendu, Page page_prec) {
                 }
             }
 
-            if (event.type == SDL_MOUSEBUTTONUP) {
-                curseur_actif = false;
-            }
+            if (event.type == SDL_MOUSEBUTTONUP) curseur_actif = false;
 
             if (event.type == SDL_MOUSEMOTION && curseur_actif) {
                 int x = event.motion.x;
@@ -589,6 +630,13 @@ Page afficher_options(SDL_Renderer* rendu, Page page_prec) {
         }
     }
 }
+
+
+
+
+
+
+
 
 
 
@@ -624,11 +672,11 @@ Page afficher_credit(SDL_Renderer* rendu, Page page_prec){
         "  Programmation du gameplay, des menus, du système de combat",
         "  Organisation générale du projet",
         "",
-        "Yanis",
+        "Yanis Abtta",
         "  Développement du gameplay (attaques, tours, effets)",
         "  Élaboration des interfaces et logique de jeu",
         "",
-        "Malak",
+        "Malak Slimane",
         "  Sélection et structuration des personnages jouables",
         "  Création des attaques spéciales et des effets de statut",
         "  Équilibrage du système de combat",
@@ -655,10 +703,7 @@ Page afficher_credit(SDL_Renderer* rendu, Page page_prec){
         "Remerciements :",
         "  Nos enseignants pour leur accompagnement",
         "  Les joueurs ayant testé le jeu et partagé leurs retours",
-        "  ChatGPT, notre débugger de l’ombre",
-        "    Qui corrige les erreurs SDL avant même qu’on crie à l’aide",
-        "    Et qui supporte nos boucles infinies à 3h du matin",
-        "  Bon... certaines musiques ne sont pas libres de droits,",
+        "  Certaines musiques ne sont pas libres de droits,",
         "  mais c’était pour la bonne cause : créer une vraie ambiance !",
         "",
         "Merci d’avoir joué à Project Shonen Smash !",
@@ -666,13 +711,12 @@ Page afficher_credit(SDL_Renderer* rendu, Page page_prec){
         "Le rideau tombe...",
         "Mais l'aventure, elle, ne fait que commencer !"
     };
-    
 
     int nb_lignes = sizeof(lignes) / sizeof(lignes[0]);
     int y_offset = HAUTEUR_FENETRE;
 
-    Mix_HaltMusic();
-    jouerMusique("ressource/musique/ogg/credit.ogg", volume_global);
+    Mix_HaltMusic();  // Couper la musique précédente
+    jouerMusique("ressource/musique/ogg/credit.ogg", volume_global); // Lancer la musique des crédits
 
     while (1) {
         SDL_RenderCopy(rendu, fond, NULL, NULL);
@@ -686,16 +730,16 @@ Page afficher_credit(SDL_Renderer* rendu, Page page_prec){
                 couleur = (SDL_Color){100, 180, 255, 255}; // Bleu
             } else if (
                 strcmp(lignes[i], "Mansour Wajih") == 0 ||
-                strcmp(lignes[i], "Yanis") == 0 ||
-                strcmp(lignes[i], "Malak") == 0 ||
+                strcmp(lignes[i], "Yanis Abtta") == 0 ||
+                strcmp(lignes[i], "Malak Slimane") == 0 ||
                 strcmp(lignes[i], "Loukas") == 0 ||
                 strcmp(lignes[i], "Nemu") == 0
             ) {
                 couleur = (SDL_Color){255, 70, 70, 255}; // Rouge
             } else if (
-                strcmp(lignes[i], "Developpement principal :") == 0 ||
+                strcmp(lignes[i], "Développement principal :") == 0 ||
                 strcmp(lignes[i], "Collaborations :") == 0 ||
-                strcmp(lignes[i], "Technologies utilisees :") == 0 ||
+                strcmp(lignes[i], "Technologies utilisées :") == 0 ||
                 strcmp(lignes[i], "Contexte :") == 0 ||
                 strcmp(lignes[i], "Remerciements :") == 0
             ) {
@@ -729,7 +773,7 @@ Page afficher_credit(SDL_Renderer* rendu, Page page_prec){
         SDL_RenderPresent(rendu);
 
         SDL_Delay(30);
-        y_offset -=5; // Défilement rapide
+        y_offset -= 5; // Texte qui défile vers le haut
 
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
@@ -756,6 +800,7 @@ Page afficher_credit(SDL_Renderer* rendu, Page page_prec){
             }
         }
 
+        // Fin automatique si tout a défilé
         if (y_offset + nb_lignes * 40 < 0) {
             SDL_DestroyTexture(bouton_retour);
             SDL_DestroyTexture(fond);
@@ -779,17 +824,17 @@ Page afficher_credit(SDL_Renderer* rendu, Page page_prec){
 
 
 
+
 // === PAGE DE JEU ===
 Page afficher_jeu(SDL_Renderer* rendu, SDL_Texture* selections_j1[3], SDL_Texture* selections_j2[3]) {
-    // Fond noir
+    // Nettoie l'écran avec un fond noir
     SDL_SetRenderDrawColor(rendu, 0, 0, 0, 255);
     SDL_RenderClear(rendu);
 
-    // Afficher les personnages sélectionnés
-    const int taille_perso = 100;
-    const int marge = 50;
-    
-    // Afficher l'équipe du joueur 1 (gauche)
+    const int taille_perso = 100; // Taille carrée des sprites affichés
+    const int marge = 50;         // Marge par rapport aux bords
+
+    // Affiche les 3 personnages de l'équipe 1 à gauche
     for (int i = 0; i < 3; i++) {
         if (selections_j1[i]) {
             SDL_Rect dest = {
@@ -802,7 +847,7 @@ Page afficher_jeu(SDL_Renderer* rendu, SDL_Texture* selections_j1[3], SDL_Textur
         }
     }
 
-    // Afficher l'équipe du joueur 2 (droite)
+    // Affiche les 3 personnages de l'équipe 2 à droite
     for (int i = 0; i < 3; i++) {
         if (selections_j2[i]) {
             SDL_Rect dest = {
@@ -815,7 +860,7 @@ Page afficher_jeu(SDL_Renderer* rendu, SDL_Texture* selections_j1[3], SDL_Textur
         }
     }
 
-    // Texte "JEU EN COURS..."
+    // Affiche "JEU EN COURS..." en bas de l'écran
     TTF_Font* police = TTF_OpenFont("ressource/langue/police/arial.ttf", 40);
     if (police) {
         SDL_Color blanc = {255, 255, 255, 255};
@@ -837,9 +882,9 @@ Page afficher_jeu(SDL_Renderer* rendu, SDL_Texture* selections_j1[3], SDL_Textur
         TTF_CloseFont(police);
     }
 
-    SDL_RenderPresent(rendu);
+    SDL_RenderPresent(rendu); // Affichage final
 
-    // Gestion des événements
+    // Boucle d'attente d'événements : QUIT ou clic/clavier → retour au menu
     SDL_Event event;
     while (1) {
         while (SDL_PollEvent(&event)) {
@@ -848,7 +893,7 @@ Page afficher_jeu(SDL_Renderer* rendu, SDL_Texture* selections_j1[3], SDL_Textur
                 return PAGE_MENU;
             }
         }
-        SDL_Delay(16); // Limite à ~60 FPS
+        SDL_Delay(16); // ~60 FPS
     }
 }
 
@@ -857,21 +902,25 @@ Page afficher_jeu(SDL_Renderer* rendu, SDL_Texture* selections_j1[3], SDL_Textur
 
 
 
+
 // === PAGE DE SÉLECTION MODE ===
 Page afficher_selec_mode(SDL_Renderer* rendu) {
+    // Chargement des textures et polices
     SDL_Texture* fond = IMG_LoadTexture(rendu, "ressource/image/fonds/fond_menu.png");
     SDL_Texture* cadre_bouton = IMG_LoadTexture(rendu, "ressource/image/cadres/cadre_texte_carre.png");
     SDL_Texture* bouton_retour = IMG_LoadTexture(rendu, "ressource/image/utilité/retour.png");
 
     TTF_Font* police_titre = TTF_OpenFont("ressource/langue/police/arial.ttf", 50);
-    TTF_Font* police = TTF_OpenFont("ressource/langue/police/arial.ttf", 65); // un peu plus petit qu’avant
+    TTF_Font* police = TTF_OpenFont("ressource/langue/police/arial.ttf", 65);
     TTF_SetFontStyle(police, TTF_STYLE_BOLD);
     SDL_Color noir = {0, 0, 0, 255};
 
+    // Dimensions des boutons
     int marge = 30;
     int largeur_bouton = (LARGEUR_FENETRE - 3 * marge) / 2;
     int hauteur_bouton = HAUTEUR_FENETRE - 2 * marge - 100;
 
+    // Textes à afficher dans les deux colonnes : J1 VS J2 et J1 VS IA
     const char* textes[2][3] = {
         {"J1", "VS", "J2"},
         {"J1", "VS", "IA"}
@@ -884,7 +933,7 @@ Page afficher_selec_mode(SDL_Renderer* rendu) {
 
     SDL_Rect retour = {20, HAUTEUR_FENETRE - 100, 80, 80};
 
-    // Titre "Sélection du mode"
+    // Création du titre
     SDL_Surface* surf_titre = TTF_RenderUTF8_Solid(police_titre, getTexte("selection mode"), noir);
     SDL_Texture* tex_titre = SDL_CreateTextureFromSurface(rendu, surf_titre);
     SDL_Rect rect_titre = {
@@ -901,6 +950,7 @@ Page afficher_selec_mode(SDL_Renderer* rendu) {
         SDL_RenderCopy(rendu, fond, NULL, NULL);
         SDL_RenderCopy(rendu, tex_titre, NULL, &rect_titre);
 
+        // Affichage des 2 gros boutons
         for (int i = 0; i < 2; i++) {
             SDL_RenderCopy(rendu, cadre_bouton, NULL, &boutons[i]);
 
@@ -923,6 +973,7 @@ Page afficher_selec_mode(SDL_Renderer* rendu) {
         SDL_RenderCopy(rendu, bouton_retour, NULL, &retour);
         SDL_RenderPresent(rendu);
 
+        // Gestion des clics
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) return PAGE_QUITTER;
 
@@ -933,13 +984,15 @@ Page afficher_selec_mode(SDL_Renderer* rendu) {
                     y >= retour.y && y <= retour.y + retour.h)
                     return PAGE_MENU;
 
+                // Bouton J1 vs J2
                 if (x >= boutons[0].x && x <= boutons[0].x + boutons[0].w &&
                     y >= boutons[0].y && y <= boutons[0].y + boutons[0].h) {
                     chemin_retour = 0;
-                    partieActuelle.iaDifficulte = 0;
+                    partieActuelle.iaDifficulte = 0; // Pas d'IA
                     return PAGE_SELECTION_PERSO;
                 }
 
+                // Bouton J1 vs IA
                 if (x >= boutons[1].x && x <= boutons[1].x + boutons[1].w &&
                     y >= boutons[1].y && y <= boutons[1].y + boutons[1].h) {
                     chemin_retour = 1;
@@ -955,8 +1008,10 @@ Page afficher_selec_mode(SDL_Renderer* rendu) {
 
 
 
+
 // === PAGE DE SÉLECTION DIFFICULTÉ ===
 Page afficher_selec_difficulte(SDL_Renderer* rendu) {
+    // Chargement des textures et polices
     SDL_Texture* fond = IMG_LoadTexture(rendu, "ressource/image/fonds/fond_menu.png");
     SDL_Texture* cadre_bouton = IMG_LoadTexture(rendu, "ressource/image/cadres/cadre_texte_carre.png");
     SDL_Texture* bouton_retour = IMG_LoadTexture(rendu, "ressource/image/utilité/retour.png");
@@ -964,12 +1019,14 @@ Page afficher_selec_difficulte(SDL_Renderer* rendu) {
     TTF_Font* police = TTF_OpenFont("ressource/langue/police/arial.ttf", 38);
     TTF_Font* police_titre = TTF_OpenFont("ressource/langue/police/arial.ttf", 56);
 
-    SDL_Color doré = {255, 215, 0, 255};   // texte doré
+    SDL_Color doré = {255, 215, 0, 255};
     SDL_Color blanc = {255, 255, 255, 255};
     SDL_Color noir = {0, 0, 0, 255};
 
+    // Identifiants de texte pour chaque bouton
     const char* ids_difficulte[] = {"facile", "moyen", "difficile"};
 
+    // Positionnement des boutons
     int largeur_bouton = 450;
     int hauteur_bouton = 120;
     int espacement = 50;
@@ -991,7 +1048,7 @@ Page afficher_selec_difficulte(SDL_Renderer* rendu) {
         SDL_RenderClear(rendu);
         SDL_RenderCopy(rendu, fond, NULL, NULL);
 
-        // === Titre stylisé ===
+        // Affichage du titre avec ombre
         SDL_Surface* surf_ombre_titre = TTF_RenderUTF8_Solid(police_titre, "Choix de la Difficulté", noir);
         SDL_Surface* surf_titre = TTF_RenderUTF8_Solid(police_titre, "Choix de la Difficulté", doré);
         SDL_Texture* tex_ombre_titre = SDL_CreateTextureFromSurface(rendu, surf_ombre_titre);
@@ -1015,7 +1072,7 @@ Page afficher_selec_difficulte(SDL_Renderer* rendu) {
         SDL_DestroyTexture(tex_ombre_titre);
         SDL_DestroyTexture(tex_titre);
 
-        // === Gestion de la souris ===
+        // Gestion du survol souris et affichage des 3 boutons
         int x, y;
         SDL_GetMouseState(&x, &y);
 
@@ -1024,11 +1081,9 @@ Page afficher_selec_difficulte(SDL_Renderer* rendu) {
             bool survol = (x >= btn->x && x <= btn->x + btn->w &&
                            y >= btn->y && y <= btn->y + btn->h);
 
-            if (survol) {
-                SDL_SetTextureColorMod(cadre_bouton, 255, 230, 150); // jaune clair
-            } else {
-                SDL_SetTextureColorMod(cadre_bouton, 255, 255, 255); // normal
-            }
+            SDL_SetTextureColorMod(cadre_bouton, survol ? 255 : 255,
+                                                  survol ? 230 : 255,
+                                                  survol ? 150 : 255);
 
             SDL_RenderCopy(rendu, cadre_bouton, NULL, btn);
 
@@ -1059,6 +1114,7 @@ Page afficher_selec_difficulte(SDL_Renderer* rendu) {
         SDL_RenderCopy(rendu, bouton_retour, NULL, &retour);
         SDL_RenderPresent(rendu);
 
+        // Gestion des clics
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) return PAGE_QUITTER;
 
@@ -1074,7 +1130,7 @@ Page afficher_selec_difficulte(SDL_Renderer* rendu) {
                 for (int i = 0; i < 3; i++) {
                     if (x >= boutons[i].x && x <= boutons[i].x + boutons[i].w &&
                         y >= boutons[i].y && y <= boutons[i].y + boutons[i].h) {
-                        partieActuelle.iaDifficulte = i + 1;
+                        partieActuelle.iaDifficulte = i + 1; // 1 = facile, 2 = moyen, 3 = difficile
                         return PAGE_SELECTION_PERSO;
                     }
                 }
@@ -1082,4 +1138,5 @@ Page afficher_selec_difficulte(SDL_Renderer* rendu) {
         }
     }
 }
+
 
