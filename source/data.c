@@ -229,7 +229,7 @@ Fighter zoro={
     .agilite = 20,
     .vitesse = 5,
     .magie = 15,
-    .element = ELEMENT_NONE,
+    .element = 7,
     .pt = 0
 };
 
@@ -242,7 +242,7 @@ Fighter rengoku={
     .agilite = 10,
     .vitesse = 10,
     .magie = 15,
-    .element = ELEMENT_FEU,
+    .element = 3,
     .pt = 0
 };
 
@@ -255,20 +255,20 @@ Fighter hitsugaya={
     .agilite = 15,
     .vitesse = 20,
     .magie = 25,
-    .element = ELEMENT_GLACE,
+    .element = 2,
     .pt = 0
 };
 
 Fighter katara={
     .nom = "katara",
     .actu_pv = 230,
-    .max_pv =230,
+    .max_pv =200,
     .attaque = 20,
     .defense = 20,
     .agilite = 15,
     .vitesse = 30,
     .magie = 40,
-    .element = ELEMENT_EAU,
+    .element = 5,
     .pt = 0
 };
 
@@ -281,7 +281,7 @@ Fighter darkshadow={
     .agilite = 20,
     .vitesse = 35,
     .magie = 35,
-    .element = ELEMENT_OMBRE,
+    .element = 6,
     .pt = 0
 };
 
@@ -294,7 +294,7 @@ Fighter temari={
     .agilite = 40,
     .vitesse = 40,
     .magie = 40,
-    .element = ELEMENT_VENT,
+    .element = 0,
     .pt = 0
 };
 
@@ -307,7 +307,7 @@ Fighter kirua={
     .agilite = 25,
     .vitesse = 50,
     .magie = 20,
-    .element = ELEMENT_ECLAIR,
+    .element = 4,
     .pt = 0
 };
 
@@ -320,7 +320,7 @@ Fighter incassable={
     .agilite = 10,
     .vitesse = 1,
     .magie = 5,
-    .element = ELEMENT_CRISTAL,
+    .element = 1,
     .pt = 0
 };
 
@@ -350,57 +350,5 @@ Joueur equipe1;
 Partie partieActuelle;
 
 
-// Applique un bonus de map à un fighter
-void appliquer_buffs(Fighter* perso, BonusMap bonus) {
-    perso->attaque += perso->attaque * bonus.bonus_attaque / 100;
-    perso->defense += perso->defense * bonus.bonus_defense / 100;
-    perso->vitesse += perso->vitesse * bonus.bonus_vitesse / 100;
-    perso->agilite += perso->agilite * bonus.bonus_agilite / 100;
-    perso->max_pv  += perso->max_pv  * bonus.bonus_pv      / 100;
-    // On rétablit les PV actuels au max après buff
-    perso->actu_pv = perso->max_pv;
-}
 
-/*
-// Retourne 1 si l’élément du perso est avantageux sur la map, 0 sinon
-int booste_sur_map(ElementType element_perso, MapType map_actuelle) {
-    switch (map_actuelle) {
-        case MAP_CRISTAL:  return element_perso == ELEMENT_CRISTAL;
-        case MAP_GLACE:    return element_perso == ELEMENT_GLACE;
-        case MAP_FEU:      return element_perso == ELEMENT_FEU;
-        case MAP_ECLAIR:   return element_perso == ELEMENT_ECLAIR;
-        case MAP_VENT:     return element_perso == ELEMENT_VENT;
-        case MAP_EAU:      return element_perso == ELEMENT_EAU;
-        case MAP_OMBRE:    return element_perso == ELEMENT_OMBRE;
-        default:           return 0;
-    }
-}
 
-// Calcule et renvoie le bonus de map pour un perso donné
-BonusMap obtenir_bonus_map(MapType map_actuelle, ElementType element_perso) {
-    BonusMap bonus = {0, 0, 0, 0, 0};
-    // Si élément aligné → +20% attaque
-    if (booste_sur_map(element_perso, map_actuelle)) {
-        bonus.bonus_attaque = 20;
-    }
-    // Exemples de buffs supplémentaires selon la map
-    switch (map_actuelle) {
-        case MAP_GLACE:
-            bonus.bonus_defense = 15;  // +15% défense sur Glace
-            break;
-        case MAP_FEU:
-            bonus.bonus_vitesse = 10;  // +10% vitesse sur Feu
-            break;
-        case MAP_EAU:
-            bonus.bonus_pv     = 25;   // +25% PV sur Eau
-            break;
-        case MAP_OMBRE:
-            bonus.bonus_agilite = 20;  // +20% esquive sur Ombre
-            break;
-        // Ajoutez d’autres cas si besoin…
-        default:
-            break;
-    }
-    return bonus;
-}
-*/

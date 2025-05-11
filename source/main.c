@@ -4,6 +4,7 @@
 #include "son.h"
 
 #include <time.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
@@ -30,15 +31,12 @@ int main(int argc, char* argv[]) {
         SDL_Quit();
         return 1;
     }
-    charger_polices();  // <-- AJOUT ICI
+    charger_polices();
 
     // MIXER
-    if (Mix_OpenAudio(48000, MIX_DEFAULT_FORMAT, 2, 1024) != 0) {
-        printf("Erreur Audio : %s\n", Mix_GetError());
-        liberer_polices();  // <-- AJOUT ICI
-        TTF_Quit();
-        SDL_Quit();
-        return 1;
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+        SDL_Log("Erreur Audio (ignorée) : %s", Mix_GetError());
+        
     }
 
     // Fenêtre
@@ -64,6 +62,8 @@ int main(int argc, char* argv[]) {
         SDL_Quit();
         return 1;
     }
+
+    srand(time(NULL));
 
     // Chargement
     page = afficher_chargement(rendu);
@@ -143,7 +143,7 @@ int main(int argc, char* argv[]) {
     SDL_DestroyRenderer(rendu);
     SDL_DestroyWindow(fenetre);
     Mix_CloseAudio();
-    liberer_polices();  // <-- AJOUT ICI À LA FIN
+    liberer_polices();
     TTF_Quit();
     SDL_Quit();
 

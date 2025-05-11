@@ -13,6 +13,8 @@
 
 int ecartementPont = 40;
 extern TTF_Font* policePetite;
+int idIncassble;
+int dureeMur;
 
 AttaqueSauvegarde tableauAttaqueDuTour [NB_PERSOS_EQUIPE * 2];
 
@@ -20,6 +22,7 @@ AttaqueSauvegarde tableauAttaqueDuTour [NB_PERSOS_EQUIPE * 2];
 
 Fighter appliquer_modificateurs(Fighter* original){
     Fighter copie = *original;
+    
     if (copie.statutEffet == 3 && copie.dureeEffet > 0) {
         copie.defense += copie.defense * 0.25;  // +25%
     }
@@ -70,6 +73,7 @@ Fighter appliquer_modificateurs(Fighter* original){
         case 13: // Defense classique
             copie.defense += copie.defense * 0.1;
     }
+
 
     return *original;
 }
@@ -130,6 +134,7 @@ AttaqueSauvegarde choisirCible(SDL_Renderer* rendu, int equipeCible, AttaqueSauv
     }
 
     Fighter* cibles[3];
+    (void)cibles;
     int x_start, direction;
 
     if (equipeCible == 1) {
@@ -187,7 +192,6 @@ AttaqueSauvegarde choisirCible(SDL_Renderer* rendu, int equipeCible, AttaqueSauv
                         if(equipeCible == 2){
                             attaque.cibleNum += 3;
                         }
-                        SDL_Log("Cible sélectionnée : perso %d de l'équipe %d", i, equipeCible);
                         choisi = true;
                     }
                 }
@@ -316,6 +320,19 @@ bool est_mur_vivant(int id) {
     return id == ATQ_MUR_VIVANT;
 }
 
+bool attaque_cible_soi_meme(int idAttaque) {
+    return idAttaque == AFFUTAGE_MORTAL ||        // Zoro
+           idAttaque == EVEIL_DU_SABRE ||         // Zoro
+           idAttaque == EVEIL_LUNAIRE ||          // Katara - change le cycle → pas de cible
+           idAttaque == CREPUSCULE ||             // Dark Shadow - change le cycle → pas de cible
+           idAttaque == FLAMMES_SOLAIRES ||       // Rengoku - change le cycle → pas de cible
+           idAttaque == BARRIERE_DE_PIERRE ||     // Incassable - boost défense de soi-même
+           idAttaque == MUR_VIVANT ||             // Incassable - protège un allié mais effet passif
+           idAttaque == HURLEMENT_NOIR ||         // Dark Shadow - AOE
+           idAttaque == VENT_PERÇANT ||           // Temari - AOE
+           idAttaque == FOUDRE_ENCHAINEE ||       // Kirua - AOE
+           idAttaque == BLIZZARD;                 // Itsugaya - AOE
+}
 
 
 void actionPerso(SDL_Renderer* renderer, Fighter* persoActuel, int equipeAdverse) {
@@ -333,7 +350,29 @@ void actionPerso(SDL_Renderer* renderer, Fighter* persoActuel, int equipeAdverse
     bool quit = false;
     SDL_Event event;
 
+    // === Coûts des compétences ===
+    SDL_Color jaune = {255, 255, 0, 255};
+    char cout1[16], cout2[16], cout3[16];
+    snprintf(cout1, sizeof(cout1), "%d PT", persoActuel->spe_atq1.cout);
+    snprintf(cout2, sizeof(cout2), "%d PT", persoActuel->spe_atq2.cout);
+    snprintf(cout3, sizeof(cout3), "%d PT", persoActuel->spe_atq3.cout);
+
+    SDL_Surface* s1 = TTF_RenderUTF8_Blended(policePetite, cout1, jaune);
+    SDL_Surface* s2 = TTF_RenderUTF8_Blended(policePetite, cout2, jaune);
+    SDL_Surface* s3 = TTF_RenderUTF8_Blended(policePetite, cout3, jaune);
+
+    SDL_Texture* t1 = SDL_CreateTextureFromSurface(renderer, s1);
+    SDL_Texture* t2 = SDL_CreateTextureFromSurface(renderer, s2);
+    SDL_Texture* t3 = SDL_CreateTextureFromSurface(renderer, s3);
+
+    SDL_Rect r1 = {btnComp1.rect.x + (btnComp1.rect.w - s1->w)/2, btnComp1.rect.y - s1->h - 5, s1->w, s1->h};
+    SDL_Rect r2 = {btnComp2.rect.x + (btnComp2.rect.w - s2->w)/2, btnComp2.rect.y - s2->h - 5, s2->w, s2->h};
+    SDL_Rect r3 = {btnComp3.rect.x + (btnComp3.rect.w - s3->w)/2, btnComp3.rect.y - s3->h - 5, s3->w, s3->h};
+
     while (!quit) {
+
+        if (tableauAttaqueDuTour[partieActuelle.perso_actif].idAttaque >= 0) return;
+
         int mx, my;
         SDL_GetMouseState(&mx, &my);
 
@@ -356,32 +395,9 @@ void actionPerso(SDL_Renderer* renderer, Fighter* persoActuel, int equipeAdverse
         drawButton(renderer, &btnComp2, policePrincipale);
         drawButton(renderer, &btnComp3, policePrincipale);
 
-        // === Coûts des compétences ===
-        SDL_Color jaune = {255, 255, 0, 255};
-        char cout1[16], cout2[16], cout3[16];
-        snprintf(cout1, sizeof(cout1), "%d PT", persoActuel->spe_atq1.cout);
-        snprintf(cout2, sizeof(cout2), "%d PT", persoActuel->spe_atq2.cout);
-        snprintf(cout3, sizeof(cout3), "%d PT", persoActuel->spe_atq3.cout);
-
-        SDL_Surface* s1 = TTF_RenderUTF8_Blended(policePetite, cout1, jaune);
-        SDL_Surface* s2 = TTF_RenderUTF8_Blended(policePetite, cout2, jaune);
-        SDL_Surface* s3 = TTF_RenderUTF8_Blended(policePetite, cout3, jaune);
-
-        SDL_Texture* t1 = SDL_CreateTextureFromSurface(renderer, s1);
-        SDL_Texture* t2 = SDL_CreateTextureFromSurface(renderer, s2);
-        SDL_Texture* t3 = SDL_CreateTextureFromSurface(renderer, s3);
-
-        SDL_Rect r1 = {btnComp1.rect.x + (btnComp1.rect.w - s1->w)/2, btnComp1.rect.y - s1->h - 5, s1->w, s1->h};
-        SDL_Rect r2 = {btnComp2.rect.x + (btnComp2.rect.w - s2->w)/2, btnComp2.rect.y - s2->h - 5, s2->w, s2->h};
-        SDL_Rect r3 = {btnComp3.rect.x + (btnComp3.rect.w - s3->w)/2, btnComp3.rect.y - s3->h - 5, s3->w, s3->h};
-
         SDL_RenderCopy(renderer, t1, NULL, &r1);
         SDL_RenderCopy(renderer, t2, NULL, &r2);
         SDL_RenderCopy(renderer, t3, NULL, &r3);
-
-        SDL_DestroyTexture(t1); SDL_FreeSurface(s1);
-        SDL_DestroyTexture(t2); SDL_FreeSurface(s2);
-        SDL_DestroyTexture(t3); SDL_FreeSurface(s3);
 
         SDL_RenderPresent(renderer);
 
@@ -401,6 +417,7 @@ void actionPerso(SDL_Renderer* renderer, Fighter* persoActuel, int equipeAdverse
                     *attaque = choisirCible(renderer, equipeAdverse, *attaque);
                     if (persoActuel->pt < 10) persoActuel->pt += 1;
                     quit = true;
+                    break;
 
                 } else if (btnDefense.hovered) {
                     *attaque = (AttaqueSauvegarde){
@@ -412,77 +429,110 @@ void actionPerso(SDL_Renderer* renderer, Fighter* persoActuel, int equipeAdverse
                     };
                     if (persoActuel->pt < 10) persoActuel->pt += 2;
                     quit = true;
+                    break;
 
                 } else if (btnComp1.hovered && persoActuel->pt >= persoActuel->spe_atq1.cout) {
                     persoActuel->pt -= persoActuel->spe_atq1.cout;
+
                     *attaque = (AttaqueSauvegarde){
                         .idAttaque = persoActuel->spe_atq1.id,
                         .utilisateurEquipe = (equipeAdverse == 1) ? 2 : 1,
                         .utilisateurNum = id,
                     };
-                    int equipeCible;
-                    if (est_mur_vivant(attaque->idAttaque) && strcmp(persoActuel->nom, "incassable") == 0) {
-                        equipeCible = (equipeAdverse == 1) ? 2 : 1;
-                    } else {
-                        equipeCible = (est_une_attaque_de_soin(attaque->idAttaque) || est_un_boost_de_def(attaque->idAttaque))
+
+                    // Détermine si c'est une attaque de soutien (soin ou boost def)
+                    int equipeCible = (est_une_attaque_de_soin(attaque->idAttaque) || est_un_boost_de_def(attaque->idAttaque))
                                     ? ((equipeAdverse == 1) ? 2 : 1)
                                     : equipeAdverse;
+
+                    // Si l'attaque cible soi-même uniquement
+                    if (attaque_cible_soi_meme(attaque->idAttaque)) {
+                        attaque->cibleEquipe = attaque->utilisateurEquipe;
+                        attaque->cibleNum = attaque->utilisateurNum;
+                    } else {
+                        *attaque = choisirCible(renderer, equipeCible, *attaque);
                     }
 
-                    *attaque = choisirCible(renderer, equipeCible, *attaque);
                     quit = true;
 
 
                 } else if (btnComp2.hovered && persoActuel->pt >= persoActuel->spe_atq2.cout) {
                     persoActuel->pt -= persoActuel->spe_atq2.cout;
+
                     *attaque = (AttaqueSauvegarde){
                         .idAttaque = persoActuel->spe_atq2.id,
                         .utilisateurEquipe = (equipeAdverse == 1) ? 2 : 1,
                         .utilisateurNum = id,
                     };
-                    int equipeCible;
-                    if (est_mur_vivant(attaque->idAttaque) && strcmp(persoActuel->nom, "incassable") == 0) {
-                        equipeCible = (equipeAdverse == 1) ? 2 : 1;
-                    } else {
-                        equipeCible = (est_une_attaque_de_soin(attaque->idAttaque) || est_un_boost_de_def(attaque->idAttaque))
+
+                    // Détermine si c'est une attaque de soutien (soin ou boost def)
+                    int equipeCible = (est_une_attaque_de_soin(attaque->idAttaque) || est_un_boost_de_def(attaque->idAttaque))
                                     ? ((equipeAdverse == 1) ? 2 : 1)
                                     : equipeAdverse;
+
+                    // Si l'attaque cible soi-même uniquement
+                    if (attaque_cible_soi_meme(attaque->idAttaque)) {
+                        attaque->cibleEquipe = attaque->utilisateurEquipe;
+                        attaque->cibleNum = attaque->utilisateurNum;
+                    } else {
+                        *attaque = choisirCible(renderer, equipeCible, *attaque);
                     }
 
-                    *attaque = choisirCible(renderer, equipeCible, *attaque);
                     quit = true;
 
 
                 } else if (btnComp3.hovered && persoActuel->pt >= persoActuel->spe_atq3.cout) {
                     persoActuel->pt -= persoActuel->spe_atq3.cout;
+
                     *attaque = (AttaqueSauvegarde){
                         .idAttaque = persoActuel->spe_atq3.id,
                         .utilisateurEquipe = (equipeAdverse == 1) ? 2 : 1,
                         .utilisateurNum = id,
                     };
-                    int equipeCible;
-                    if (est_mur_vivant(attaque->idAttaque) && strcmp(persoActuel->nom, "incassable") == 0) {
-                        equipeCible = (equipeAdverse == 1) ? 2 : 1;
-                    } else {
-                        equipeCible = (est_une_attaque_de_soin(attaque->idAttaque) || est_un_boost_de_def(attaque->idAttaque))
+
+                    // Détermine si c'est une attaque de soutien (soin ou boost def)
+                    int equipeCible = (est_une_attaque_de_soin(attaque->idAttaque) || est_un_boost_de_def(attaque->idAttaque))
                                     ? ((equipeAdverse == 1) ? 2 : 1)
                                     : equipeAdverse;
+
+                    // Si l'attaque cible soi-même uniquement
+                    if (attaque_cible_soi_meme(attaque->idAttaque)) {
+                        attaque->cibleEquipe = attaque->utilisateurEquipe;
+                        attaque->cibleNum = attaque->utilisateurNum;
+                    } else {
+                        *attaque = choisirCible(renderer, equipeCible, *attaque);
                     }
 
-                    *attaque = choisirCible(renderer, equipeCible, *attaque);
                     quit = true;
 
+
+                }
+            } else if (event.type == SDL_KEYDOWN) {
+                switch (event.key.keysym.sym) {
+                    case SDLK_p:  // touche "p" → donne 10 PT
+                        persoActuel->pt = 10;
+                        SDL_Log("[DEBUG] %s a maintenant 10 PT.", persoActuel->nom);
+                        break;
+                    case SDLK_m:  // touche "m" → vie à fond
+                        persoActuel->actu_pv = persoActuel->max_pv;
+                        SDL_Log("[DEBUG] %s récupère toute sa vie.", persoActuel->nom);
+                        break;
+                    case SDLK_DELETE:  // touche "Suppr" → vie à 0
+                        persoActuel->actu_pv = 0;
+                        SDL_Log("[DEBUG] %s est mis KO (PV = 0).", persoActuel->nom);
+                        quit = true;
+                        break;
                 }
             }
+            
         }
 
-        SDL_Delay(8);
+        SDL_Delay(16);
     }
+    SDL_DestroyTexture(t1); SDL_FreeSurface(s1);
+    SDL_DestroyTexture(t2); SDL_FreeSurface(s2);
+    SDL_DestroyTexture(t3); SDL_FreeSurface(s3);
 }
-
-
-
-
 
 
 
@@ -509,22 +559,79 @@ void actionPerso(SDL_Renderer* renderer, Fighter* persoActuel, int equipeAdverse
 void runGame(SDL_Renderer* rendu) {
     arreter_musique("ressource/musique/ogg/selection_personnages.ogg");
     SDL_GetWindowSize(fenetre, &screenWidth, &screenHeight);
-
+    
+    partieActuelle.mapType = rand() % 9;
+    
+    
     partieActuelle.joueur1.fighter1 = persoChoisi[0];
+    if(partieActuelle.joueur1.fighter1.element == partieActuelle.mapType){ 
+        partieActuelle.joueur1.fighter1.max_pv += 20;
+        partieActuelle.joueur1.fighter1.actu_pv += 20;
+        SDL_Log("%s recoit un boost d'élement !",partieActuelle.joueur1.fighter1.nom);
+    } 
     partieActuelle.joueur1.fighter2 = persoChoisi[2];
-    partieActuelle.joueur1.fighter3 = persoChoisi[4];
-    partieActuelle.joueur2.fighter1 = persoChoisi[1];
-    partieActuelle.joueur2.fighter2 = persoChoisi[3];
-    partieActuelle.joueur2.fighter3 = persoChoisi[5];
+    if(partieActuelle.joueur1.fighter2.element == partieActuelle.mapType){
+        partieActuelle.joueur1.fighter2.max_pv += 20;
+        partieActuelle.joueur1.fighter2.actu_pv += 20;
+        SDL_Log("%s recoit un boost d'élement !",partieActuelle.joueur1.fighter2.nom);
+    }
 
+    partieActuelle.joueur1.fighter3 = persoChoisi[4];
+    if(partieActuelle.joueur1.fighter3.element == partieActuelle.mapType){ 
+        partieActuelle.joueur1.fighter3.max_pv += 20;
+        partieActuelle.joueur1.fighter3.actu_pv += 20;
+        SDL_Log("%s recoit un boost d'élement !",partieActuelle.joueur1.fighter3.nom);
+    }
+
+    partieActuelle.joueur2.fighter1 = persoChoisi[1];
+    if(partieActuelle.joueur2.fighter1.element == partieActuelle.mapType){
+        partieActuelle.joueur2.fighter1.max_pv += 20;
+        partieActuelle.joueur2.fighter1.actu_pv += 20;
+        SDL_Log("%s recoit un boost d'élement !",partieActuelle.joueur2.fighter1.nom);
+    }
+
+
+    partieActuelle.joueur2.fighter2 = persoChoisi[3];
+    if(partieActuelle.joueur2.fighter2.element == partieActuelle.mapType){ 
+        partieActuelle.joueur2.fighter2.max_pv += 20;
+        partieActuelle.joueur2.fighter2.actu_pv += 20;
+        SDL_Log("%s recoit un boost d'élement !",partieActuelle.joueur2.fighter2.nom);
+    }
+
+    partieActuelle.joueur2.fighter3 = persoChoisi[5];
+    if(partieActuelle.joueur2.fighter3.element == partieActuelle.mapType){
+        partieActuelle.joueur2.fighter3.max_pv += 20;
+        partieActuelle.joueur2.fighter3.actu_pv += 20;
+        SDL_Log("%s recoit un boost d'élement !",partieActuelle.joueur2.fighter3.nom);
+    }
+
+    
+
+    for (int i = 0; i < 6; i++) {
+        if (strcmp(persoChoisi[i].nom, "incassable") == 0) {
+            if (strcmp(persoChoisi[i].nom, partieActuelle.joueur1.fighter1.nom) == 0) idIncassble = 0;
+            else if (strcmp(persoChoisi[i].nom, partieActuelle.joueur1.fighter2.nom) == 0) idIncassble = 1;
+            else if (strcmp(persoChoisi[i].nom, partieActuelle.joueur1.fighter3.nom) == 0) idIncassble = 2;
+            else if (strcmp(persoChoisi[i].nom, partieActuelle.joueur2.fighter1.nom) == 0) idIncassble = 3;
+            else if (strcmp(persoChoisi[i].nom, partieActuelle.joueur2.fighter2.nom) == 0) idIncassble = 4;
+            else if (strcmp(persoChoisi[i].nom, partieActuelle.joueur2.fighter3.nom) == 0) idIncassble = 5;
+            break;
+        }
+    }
+    
+    dureeMur = 0;
+
+    dureeMur = 0;
     partieActuelle.perso_actif = 0;
     partieActuelle.tour = 1;
     partieActuelle.equipeQuiCommence = rand() % 2 + 1;
     partieActuelle.fin = false;
-    partieActuelle.mapType = rand() % 9;
+    
+    
 
     char musiquePath[128];
     snprintf(musiquePath, sizeof(musiquePath), "ressource/musique/ogg/jeu/combat_%d.ogg", partieActuelle.mapType);
+    jouerMusique(musiquePath, 20);
 
     switch (partieActuelle.mapType){
         case 0: ecartementPont = -25; break;
@@ -539,40 +646,72 @@ void runGame(SDL_Renderer* rendu) {
         default: break;
     }
 
-    jouerMusique(musiquePath, 20);
-
     while (!partieActuelle.fin) {
         for (int i = 0; i < NB_PERSOS_EQUIPE * 2; i++) {
             tableauAttaqueDuTour[i] = (AttaqueSauvegarde){ .idAttaque = -1 };
         }
 
         renduJeu(rendu);
-        SDL_Log("==================================== Tour %d =======================================", partieActuelle.tour);
         animationNouveauTour(rendu, partieActuelle.tour);
-
         int equipeDebut = (partieActuelle.tour % 2 == 0) ? partieActuelle.equipeQuiCommence : 3 - partieActuelle.equipeQuiCommence;
 
-        // Tour de la première équipe
-        for (int i = 0; i < 3; i++) {
-            Fighter* perso = get_fighter((equipeDebut == 2) ? i + 3 : i);
-            if (perso->actu_pv <= 0) continue;
-            appliquer_et_mettre_a_jour_effets(perso);
-            partieActuelle.perso_actif = (equipeDebut == 1) ? i : i + 3;
-            actionPerso(rendu, perso, (equipeDebut == 1) ? 2 : 1);
-        }
+        for (int e = 0; e < 2; e++) {
+            int equipe = (e == 0) ? equipeDebut : 3 - equipeDebut;
+            for (int i = 0; i < 3; i++) {
+                int index = (equipe == 1) ? i : i + 3;
+                Fighter* perso = get_fighter(index);
+                if (perso->actu_pv <= 0) continue;
+                appliquer_et_mettre_a_jour_effets(perso);
+                partieActuelle.perso_actif = index;
 
-        // Tour de la seconde équipe
-        for (int i = 0; i < 3; i++) {
-            Fighter* perso = get_fighter((equipeDebut == 1) ? i + 3 : i);
-            if (perso->actu_pv <= 0) continue;
-            appliquer_et_mettre_a_jour_effets(perso);
-            partieActuelle.perso_actif = (equipeDebut == 1) ? i + 3 : i;
-            actionPerso(rendu, perso, (equipeDebut == 1) ? 1 : 2);
+
+                //IA Facile
+
+
+                if (equipe == 2 && partieActuelle.iaDifficulte > 0) {
+                    int choix = rand() % 100;
+                    AttaqueSauvegarde* action = &tableauAttaqueDuTour[index];
+
+                    if (choix <= 10 && perso->pt >= perso->spe_atq1.cout){
+                        perso->pt -= perso->spe_atq1.cout;
+                        *action = (AttaqueSauvegarde){.idAttaque = perso->spe_atq1.id, .utilisateurEquipe = 2, .utilisateurNum = index};
+                    } else if (choix <= 20 && perso->pt >= perso->spe_atq2.cout) {
+                        perso->pt -= perso->spe_atq2.cout;
+                        *action = (AttaqueSauvegarde){.idAttaque = perso->spe_atq2.id, .utilisateurEquipe = 2, .utilisateurNum = index};
+                    } else if (choix <= 30 && perso->pt >= perso->spe_atq3.cout) {
+                        perso->pt -= perso->spe_atq3.cout;
+                        *action = (AttaqueSauvegarde){.idAttaque = perso->spe_atq3.id, .utilisateurEquipe = 2, .utilisateurNum = index};
+                    } else if (choix <= 65) {
+                        *action = (AttaqueSauvegarde){.idAttaque = DEFENSE, .utilisateurEquipe = 2, .utilisateurNum = index, .cibleEquipe = -1, .cibleNum = -1};
+                        if (perso->pt < 10) perso->pt += 2;
+                        SDL_Log("%s Choisi de ce defendre", perso->nom);
+                    } else {
+                        *action = (AttaqueSauvegarde){.idAttaque = ATTAQUE_BASIQUE, .utilisateurEquipe = 2, .utilisateurNum = index};
+                        if (perso->pt < 10) perso->pt += 1;
+                    }
+
+                    if (action->idAttaque != DEFENSE) {
+                        int vivants[3], n = 0;
+                        for (int j = 0; j < 3; j++) {
+                            Fighter* f = get_fighter(j); // J1 est 0,1,2
+                            if (f->actu_pv > 0) vivants[n++] = j;
+                        }
+                        if (n > 0) {
+                            int cibleIndex = vivants[rand() % n];
+                            action->cibleEquipe = 1;
+                            action->cibleNum = cibleIndex;
+                        }
+                    }
+
+                    SDL_Delay(500);
+                } else {
+                    actionPerso(rendu, perso, (equipe == 1) ? 2 : 1);
+                }
+            }
         }
 
         partieActuelle.perso_actif = 0;
 
-        // Vérifie qu'au moins une action a été faite
         bool actionTrouvee = false;
         for (int i = 0; i < NB_PERSOS_EQUIPE * 2; i++) {
             if (tableauAttaqueDuTour[i].idAttaque >= 0) {
@@ -581,14 +720,7 @@ void runGame(SDL_Renderer* rendu) {
             }
         }
 
-        if (!actionTrouvee) {
-            SDL_Log("Aucune attaque détectée. En attente d'action...");
-            SDL_Delay(1000);
-            continue; // Ne pas avancer le tour
-        }
-
-        // Tri par vitesse
-
+        if (!actionTrouvee) continue;
 
         int tabIdVitesse[6] = {0, 1, 2, 3, 4, 5};
         for (int i = 0; i < 5; i++) {
@@ -603,61 +735,21 @@ void runGame(SDL_Renderer* rendu) {
             }
         }
 
-        // Appliquer Mur Vivant AVANT les attaques
-        for (int i = 0; i < NB_PERSOS_EQUIPE * 2; i++) {
-            AttaqueSauvegarde action = tableauAttaqueDuTour[i];
-
-            if (action.idAttaque == ATQ_MUR_VIVANT) {
-                if (action.cibleNum >= 0 && strcmp(persoChoisi[action.utilisateurNum].nom, "incassable") == 0) {
-                    persoChoisi[action.cibleNum].protegePar = action.utilisateurNum;
-                    SDL_Log("Mur Vivant préparé : %s protégera %s", 
-                        persoChoisi[action.utilisateurNum].nom,
-                        persoChoisi[action.cibleNum].nom);
-                }
-            }
-        }
-
-        // Exécution des attaques
         for (int i = 0; i < NB_PERSOS_EQUIPE * 2; i++) {
             int index = tabIdVitesse[i];
             AttaqueSauvegarde action = tableauAttaqueDuTour[index];
-            
-            SDL_Log("actionUtilisateurEquipe : %d\n actionUtilisateurNum : %d\n",action.utilisateurEquipe,
-                                                                action.utilisateurNum);
-            
             Fighter* utilisateur = get_fighter(action.utilisateurNum);
             Fighter* cible = get_fighter(action.cibleNum);
 
-            SDL_Log("\ntest 1\n");
-
-
             if (action.idAttaque >= 0 && action.idAttaque < NB_ATTAQUES_TOTAL) {
-                if (!toutes_les_attaques[action.idAttaque]) {
-                    SDL_Log("Erreur : attaque id %d non initialisée", action.idAttaque);
-                    continue;
-                }
-
+                if (!toutes_les_attaques[action.idAttaque]) continue;
                 AttaqueSpecial* atq = toutes_les_attaques[action.idAttaque];
                 SDL_Rect rectUtilisateur = get_rect_fighter(utilisateur);
                 SDL_Rect rectCible = get_rect_fighter(cible);
-                
-                SDL_Log("\ntest 2\n");
-
                 jouerAnimationAttaque(rendu, atq->type, rectUtilisateur, rectCible, utilisateur->element);
                 renduJeu(rendu);
-
                 if (cible && cible->pt < 10) cible->pt += 1;
-                
-                SDL_Log("\ntest 3\n");
-                
-                
-                SDL_Log("ActionIdAttaque : %d\n Utilisateur : %s\n  Cible : %s\n",action.idAttaque,utilisateur->nom,
-                                                                    cible->nom);
-
-
                 fonctions_attaques[action.idAttaque](utilisateur, cible);
-            } else {
-                SDL_Log("Erreur : attaque invalide id=%d", action.idAttaque);
             }
         }
 
@@ -668,7 +760,7 @@ void runGame(SDL_Renderer* rendu) {
             SDL_Log("L'équipe 2 est éliminée. L'équipe 1 gagne !");
             partieActuelle.fin = true;
         }
-        // Mise à jour des statuts temporaires (ex: bonus défense temporaire)
+
         for (int i = 0; i < NB_PERSOS_EQUIPE * 2; i++) {
             Fighter* f = get_fighter(i);
             if (f->dureeEffet > 0) {
@@ -678,18 +770,14 @@ void runGame(SDL_Renderer* rendu) {
                     SDL_Log("%s perd son bonus de défense.", f->nom);
                 }
             }
-        }
-
-
-
-        for (int i = 0; i < NB_PERSOS_EQUIPE * 2; i++) {
             persoChoisi[i].protegePar = -1;
         }
 
-
+        if (dureeMur > 0) dureeMur--;
         partieActuelle.tour++;
     }
 
     SDL_Log("\n\n_______Fin du jeu ! Merci d'avoir joué._______\n\n");
     exit(0);
 }
+

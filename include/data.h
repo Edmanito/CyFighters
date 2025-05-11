@@ -67,6 +67,8 @@ typedef struct {
     int type;
 } AttaqueSpecial;
 
+
+
 typedef struct {
     char nom[MAX_NOM_PERSO];
     int actu_pv, max_pv;
@@ -77,7 +79,7 @@ typedef struct {
     int dureeEffet;         // durée en tours restants
     int protegePar; // -1 si pas protégé, sinon contient l'index du protecteur (entre 0 et 5)   Pour Incassable
 
-    ElementType element;
+    int element;
     AttaqueSpecial spe_atq1, spe_atq2, spe_atq3;
 } Fighter;
 
@@ -133,7 +135,10 @@ void appliquer_buffs(Fighter* perso, BonusMap bonus);
 bool equipe_est_morte(int equipe);
 void runGame(SDL_Renderer* rendu);
 
+
 // === Variables globales ===
+extern int idIncassble;
+extern int dureeMur;
 extern SDL_Window* fenetre;
 extern int screenWidth;
 extern int screenHeight;

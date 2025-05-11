@@ -10,7 +10,6 @@ SRC = \
     source/jeu.c \
     source/langue.c \
     source/main.c \
-    source/maps.c \
     source/menu.c \
     source/select_perso.c\
     source/son.c
