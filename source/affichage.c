@@ -363,6 +363,4 @@ void jouerAnimationAttaque(SDL_Renderer* renderer, int type, SDL_Rect lanceur, S
             SDL_Log("Erreur : animation type %d inconnue", type);
             break;
     }
-
-    SDL_Delay(300);
 }

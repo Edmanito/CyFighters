@@ -208,6 +208,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     persoChoisi[a].defense=darkshadow.defense;
                                     persoChoisi[a].agilite=darkshadow.agilite;
                                     persoChoisi[a].vitesse=darkshadow.vitesse;
+                                    persoChoisi[a].magie=darkshadow.magie;
                                     persoChoisi[a].element=darkshadow.element;
                                     persoChoisi[a].spe_atq1 = crepuscule;
                                     persoChoisi[a].spe_atq2 = hurlementNoir;
@@ -224,6 +225,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     persoChoisi[a].defense=hitsugaya.defense;
                                     persoChoisi[a].agilite=hitsugaya.agilite;
                                     persoChoisi[a].vitesse=hitsugaya.vitesse;
+                                    persoChoisi[a].magie=hitsugaya.magie;
                                     persoChoisi[a].element=hitsugaya.element;
                                     persoChoisi[a].spe_atq1 = prisonDeGivre;
                                     persoChoisi[a].spe_atq2 = blizzard;
@@ -239,6 +241,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     persoChoisi[a].defense=incassable.defense;
                                     persoChoisi[a].agilite=incassable.agilite;
                                     persoChoisi[a].vitesse=incassable.vitesse;
+                                    persoChoisi[a].magie=incassable.magie;
                                     persoChoisi[a].element=incassable.element;
                                     persoChoisi[a].spe_atq1 = murVivant;
                                     persoChoisi[a].spe_atq2 = barriereDePierre;
@@ -255,6 +258,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     persoChoisi[a].defense=katara.defense;
                                     persoChoisi[a].agilite=katara.agilite;
                                     persoChoisi[a].vitesse=katara.vitesse;
+                                    persoChoisi[a].magie=katara.magie;
                                     persoChoisi[a].element=katara.element;
                                     persoChoisi[a].spe_atq1 = lienDeSang;
                                     persoChoisi[a].spe_atq2 = vagueGuerisseuse;
@@ -271,6 +275,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     persoChoisi[a].defense=kirua.defense;
                                     persoChoisi[a].agilite=kirua.agilite;
                                     persoChoisi[a].vitesse=kirua.vitesse;
+                                    persoChoisi[a].magie=kirua.magie;
                                     persoChoisi[a].element=kirua.element;
                                     persoChoisi[a].spe_atq1 = fulgurance;
                                     persoChoisi[a].spe_atq2 = foudreEnchainee;
@@ -287,6 +292,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     persoChoisi[a].defense=rengoku.defense;
                                     persoChoisi[a].agilite=rengoku.agilite;
                                     persoChoisi[a].vitesse=rengoku.vitesse;
+                                    persoChoisi[a].magie=rengoku.magie;
                                     persoChoisi[a].element=rengoku.element;
                                     persoChoisi[a].spe_atq1 = flammesSolaires;
                                     persoChoisi[a].spe_atq2 = explosionArdente;
@@ -303,6 +309,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     persoChoisi[a].defense=temari.defense;
                                     persoChoisi[a].agilite=temari.agilite;
                                     persoChoisi[a].vitesse=temari.vitesse;
+                                    persoChoisi[a].magie=temari.magie;
                                     persoChoisi[a].element=temari.element;
                                     persoChoisi[a].spe_atq1 = danseDuVent;
                                     persoChoisi[a].spe_atq2 = ventPercant;
@@ -319,6 +326,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     persoChoisi[a].defense=zoro.defense;
                                     persoChoisi[a].agilite=zoro.agilite;
                                     persoChoisi[a].vitesse=zoro.vitesse;
+                                    persoChoisi[a].magie=zoro.magie;
                                     persoChoisi[a].element=zoro.element;
                                     persoChoisi[a].spe_atq1 = affutageMortal;
                                     persoChoisi[a].spe_atq2 = assautTranchant;
@@ -334,6 +342,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                     persoChoisi[a].defense=zoro.defense;
                                     persoChoisi[a].agilite=zoro.agilite;
                                     persoChoisi[a].vitesse=zoro.vitesse;
+                                    persoChoisi[a].magie=zoro.magie;
                                     persoChoisi[a].element=zoro.element;
                                     persoChoisi[a].spe_atq1 = affutageMortal;
                                     persoChoisi[a].spe_atq2 = assautTranchant;
@@ -384,6 +393,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                             persoChoisi[a].defense=darkshadow.defense;
                                             persoChoisi[a].agilite=darkshadow.agilite;
                                             persoChoisi[a].vitesse=darkshadow.vitesse;
+                                            persoChoisi[a].magie=darkshadow.magie;
                                             persoChoisi[a].element=darkshadow.element;
                                             persoChoisi[a].spe_atq1 = crepuscule;
                                             persoChoisi[a].spe_atq2 = hurlementNoir;
@@ -400,6 +410,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                             persoChoisi[a].defense=hitsugaya.defense;
                                             persoChoisi[a].agilite=hitsugaya.agilite;
                                             persoChoisi[a].vitesse=hitsugaya.vitesse;
+                                            persoChoisi[a].magie=hitsugaya.magie;
                                             persoChoisi[a].element=hitsugaya.element;
                                             persoChoisi[a].spe_atq1 = prisonDeGivre;
                                             persoChoisi[a].spe_atq2 = blizzard;
@@ -415,6 +426,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                             persoChoisi[a].defense=incassable.defense;
                                             persoChoisi[a].agilite=incassable.agilite;
                                             persoChoisi[a].vitesse=incassable.vitesse;
+                                            persoChoisi[a].magie=incassable.magie;
                                             persoChoisi[a].element=incassable.element;
                                             persoChoisi[a].spe_atq1 = murVivant;
                                             persoChoisi[a].spe_atq2 = barriereDePierre;
@@ -431,6 +443,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                             persoChoisi[a].defense=katara.defense;
                                             persoChoisi[a].agilite=katara.agilite;
                                             persoChoisi[a].vitesse=katara.vitesse;
+                                            persoChoisi[a].magie=katara.magie;
                                             persoChoisi[a].element=katara.element;
                                             persoChoisi[a].spe_atq1 = lienDeSang;
                                             persoChoisi[a].spe_atq2 = vagueGuerisseuse;
@@ -447,6 +460,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                             persoChoisi[a].defense=kirua.defense;
                                             persoChoisi[a].agilite=kirua.agilite;
                                             persoChoisi[a].vitesse=kirua.vitesse;
+                                            persoChoisi[a].magie=kirua.magie;
                                             persoChoisi[a].element=kirua.element;
                                             persoChoisi[a].spe_atq1 = fulgurance;
                                             persoChoisi[a].spe_atq2 = foudreEnchainee;
@@ -463,6 +477,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                             persoChoisi[a].defense=rengoku.defense;
                                             persoChoisi[a].agilite=rengoku.agilite;
                                             persoChoisi[a].vitesse=rengoku.vitesse;
+                                            persoChoisi[a].magie=rengoku.magie;
                                             persoChoisi[a].element=rengoku.element;
                                             persoChoisi[a].spe_atq1 = flammesSolaires;
                                             persoChoisi[a].spe_atq2 = explosionArdente;
@@ -479,6 +494,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                             persoChoisi[a].defense=temari.defense;
                                             persoChoisi[a].agilite=temari.agilite;
                                             persoChoisi[a].vitesse=temari.vitesse;
+                                            persoChoisi[a].magie=temari.magie;
                                             persoChoisi[a].element=temari.element;
                                             persoChoisi[a].spe_atq1 = danseDuVent;
                                             persoChoisi[a].spe_atq2 = ventPercant;
@@ -495,6 +511,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                             persoChoisi[a].defense=zoro.defense;
                                             persoChoisi[a].agilite=zoro.agilite;
                                             persoChoisi[a].vitesse=zoro.vitesse;
+                                            persoChoisi[a].magie=zoro.magie;
                                             persoChoisi[a].element=zoro.element;
                                             persoChoisi[a].spe_atq1 = affutageMortal;
                                             persoChoisi[a].spe_atq2 = assautTranchant;
@@ -511,6 +528,7 @@ Page afficher_selection_perso(SDL_Renderer* rendu, SDL_Texture* selections_j1[3]
                                             persoChoisi[a].defense=zoro.defense;
                                             persoChoisi[a].agilite=zoro.agilite;
                                             persoChoisi[a].vitesse=zoro.vitesse;
+                                            persoChoisi[a].magie=zoro.magie;
                                             persoChoisi[a].element=zoro.element;
                                             persoChoisi[a].spe_atq1 = affutageMortal;
                                             persoChoisi[a].spe_atq2 = assautTranchant;
