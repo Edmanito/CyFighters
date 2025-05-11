@@ -17,6 +17,7 @@
 6. **Sélection des personnages** :
    - Chaque joueur choisit 3 persos
    - Une fiche personnage s’affiche à chaque sélection
+   - WIKI dispo pour + d'infos sur les perso : https://docs.google.com/spreadsheets/d/1VntuCaEuMByoXTKVCeWwX7ST6zuhgkKcI6zrWGRCpZs/edit?usp=sharing
 7. **Page de confirmation** :
    - Vue des deux équipes
 8. **Combat (page de jeu)** :
