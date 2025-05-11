@@ -192,7 +192,12 @@ AttaqueSauvegarde choisirCible(SDL_Renderer* rendu, int equipeCible, AttaqueSauv
                         if(equipeCible == 2){
                             attaque.cibleNum += 3;
                         }
+                        if(cibles[i]->actu_pv > 0){
                         choisi = true;
+                        }
+                        else{
+                            SDL_Log("%s est hors du combat ! Choissisez une autre cible",cibles[i]->nom);
+                        }
                     }
                 }
             }
