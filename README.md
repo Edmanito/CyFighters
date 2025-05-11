@@ -72,5 +72,7 @@
 ```bash
 sudo apt install libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev
 make clean
-make jeu
+make compile
+make jeu (pour clean compiler et jouer !!) <- Il faut donc executer la commande make jeu pour lancer le jeu.  
 ./exec/jeu
+
