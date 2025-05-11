@@ -682,7 +682,7 @@ Page afficher_credit(SDL_Renderer* rendu, Page page_prec){
         "  Équilibrage du système de combat",
         "",
         "Collaborations :",
-        "Loukas",
+        "Lukas",
         "  Contributions techniques sur certains éléments de l’interface SDL2",
         "  Suggestions sur l’organisation des fichiers et du code",
         "",
@@ -732,7 +732,7 @@ Page afficher_credit(SDL_Renderer* rendu, Page page_prec){
                 strcmp(lignes[i], "Mansour Wajih") == 0 ||
                 strcmp(lignes[i], "Yanis Abtta") == 0 ||
                 strcmp(lignes[i], "Malak Slimane") == 0 ||
-                strcmp(lignes[i], "Loukas") == 0 ||
+                strcmp(lignes[i], "Lukas") == 0 ||
                 strcmp(lignes[i], "Nemu") == 0
             ) {
                 couleur = (SDL_Color){255, 70, 70, 255}; // Rouge

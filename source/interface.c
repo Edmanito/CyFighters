@@ -77,9 +77,18 @@ void liberer_texte(SDL_Texture* texture) {
 // Vérifie si une équipe est morte (tous les persos à 0 PV)
 // ================================
 bool equipe_est_morte(int equipe) {
-    for (int i = 0; i < 3; i++) {
-        Fighter* p = get_fighter(i);
-        if (p->actu_pv > 0) return false;
+    if(equipe == 1){
+        for (int i = 0; i < 3; i++) {
+            Fighter* p = get_fighter(i);
+            if (p->actu_pv > 0) return false;
+        }
+        return true;
     }
-    return true;
+    else{
+        for (int i = 3; i < 6; i++) {
+            Fighter* p = get_fighter(i);
+            if (p->actu_pv > 0) return false;
+        }
+        return true;
+    }
 }

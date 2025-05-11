@@ -18,6 +18,7 @@ int ecartementPont = 40;
 extern TTF_Font* policePetite;
 int idIncassble;
 int dureeMur;
+extern int volume_global;
 
 // Tableau des actions à effectuer pour chaque personnage pendant un tour
 AttaqueSauvegarde tableauAttaqueDuTour [NB_PERSOS_EQUIPE * 2];
@@ -501,6 +502,77 @@ void actionPerso(SDL_Renderer* renderer, Fighter* persoActuel, int equipeAdverse
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Page afficher_ecran_fin(SDL_Renderer* rendu, int gagnant) {
+    SDL_Texture* fond = IMG_LoadTexture(rendu, "ressource/image/fonds/fin.png");
+    if (!fond) {
+        SDL_Log("Erreur chargement fond victoire : %s", SDL_GetError());
+        return PAGE_MENU;
+    }
+
+    // Chargement police et message
+    TTF_Font* police = TTF_OpenFont("ressource/langue/police/arial.ttf", 60);
+    SDL_Color blanc = {255, 255, 255, 255};
+
+    const char* message = "";
+    if (partieActuelle.iaDifficulte > 0) {
+        message = (gagnant == 1) ? "Victoire du Joueur !" : "Défaite... L'IA gagne.";
+        jouerMusique((gagnant == 1) ? "ressource/musique/ogg/victoire.ogg" : "ressource/musique/ogg/defaite.ogg", volume_global);
+    } else {
+        message = (gagnant == 1) ? "Victoire de l'équipe 1 !" : "Victoire de l'équipe 2 !";
+        jouerMusique("ressource/musique/ogg/victoire.ogg", volume_global);
+    }
+
+    SDL_Surface* texte = TTF_RenderUTF8_Blended(police, message, blanc);
+    SDL_Texture* tex = SDL_CreateTextureFromSurface(rendu, texte);
+
+    SDL_Rect rectTexte = {
+        (LARGEUR_FENETRE - texte->w) / 2,
+        (HAUTEUR_FENETRE - texte->h) / 2,
+        texte->w,
+        texte->h
+    };
+
+    // Affichage fond + message
+    SDL_RenderClear(rendu);
+    SDL_RenderCopy(rendu, fond, NULL, NULL);
+    SDL_RenderCopy(rendu, tex, NULL, &rectTexte);
+    SDL_RenderPresent(rendu);
+
+    SDL_FreeSurface(texte);
+    SDL_DestroyTexture(tex);
+    SDL_DestroyTexture(fond);
+    TTF_CloseFont(police);
+
+    // Pause 3 secondes avant de revenir au menu
+    SDL_Delay(10000);
+    return PAGE_MENU;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 // Fonction principale de déroulement du combat tour par tour
 void runGame(SDL_Renderer* rendu) {
     arreter_musique("ressource/musique/ogg/selection_personnages.ogg");
@@ -713,6 +785,17 @@ void runGame(SDL_Renderer* rendu) {
 
         if (dureeMur > 0) dureeMur--;
         partieActuelle.tour++;
+    }
+
+     // Détermination du gagnant
+    int gagnant = -1;
+    if (equipe_est_morte(1)) gagnant = 2;
+    else if (equipe_est_morte(2)) gagnant = 1;
+
+    if (gagnant != -1) {
+        SDL_Log("Victoire équipe %d !", gagnant);
+        afficher_ecran_fin(rendu, gagnant);
+        return;
     }
 
     SDL_Log("Fin du jeu !");
