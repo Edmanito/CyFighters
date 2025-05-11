@@ -335,6 +335,101 @@ bool attaque_cible_soi_meme(int idAttaque) {
 }
 
 
+
+
+
+
+
+
+
+
+bool afficher_pause(SDL_Renderer* rendu) {
+    SDL_Event event;
+    bool continuer = true;
+    bool quitter_pause = false;
+    bool dansPageSon = false;
+
+    TTF_Font* font = TTF_OpenFont("ressource/langue/police/arial.ttf", 50);
+    if (!font) {
+        SDL_Log("Erreur ouverture police pause : %s", TTF_GetError());
+        return true;
+    }
+
+    Button btnContinuer = {{screenWidth/2 - 150, 200, 300, 80}, {80,80,80,255}, {150,150,150,255}, false, "Continuer"};
+    Button btnSon       = {{screenWidth/2 - 150, 310, 300, 80}, {80,80,80,255}, {150,150,150,255}, false, "Son"};
+    Button btnQuitter   = {{screenWidth/2 - 150, 420, 300, 80}, {80,80,80,255}, {150,150,150,255}, false, "Quitter"};
+
+    // Slider
+    SDL_Rect sliderBar = {screenWidth/2 - 150, 300, 300, 10};
+    SDL_Rect sliderKnob = {sliderBar.x + 150 - 5, sliderBar.y - 5, 10, 20}; // valeur initiale au milieu
+
+    SDL_Texture* flecheRetour = IMG_LoadTexture(rendu, "ressource/image/utilité/retour.png");
+    SDL_Rect rectRetour = {30, 30, 60, 60};
+
+    while (!quitter_pause && continuer) {
+        int mx, my;
+        SDL_GetMouseState(&mx, &my);
+
+        SDL_SetRenderDrawColor(rendu, 10, 10, 10, 240); // fond sombre
+        SDL_RenderClear(rendu);
+
+        if (!dansPageSon) {
+            btnContinuer.hovered = isMouseOver(&btnContinuer, mx, my);
+            btnSon.hovered = isMouseOver(&btnSon, mx, my);
+            btnQuitter.hovered = isMouseOver(&btnQuitter, mx, my);
+
+            drawButton(rendu, &btnContinuer, font);
+            drawButton(rendu, &btnSon, font);
+            drawButton(rendu, &btnQuitter, font);
+        } else {
+            SDL_SetRenderDrawColor(rendu, 255, 255, 255, 255);
+            SDL_RenderFillRect(rendu, &sliderBar);
+
+            SDL_SetRenderDrawColor(rendu, 200, 0, 0, 255);
+            SDL_RenderFillRect(rendu, &sliderKnob);
+
+            if (flecheRetour)
+                SDL_RenderCopy(rendu, flecheRetour, NULL, &rectRetour);
+        }
+
+        SDL_RenderPresent(rendu);
+
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) exit(0);
+            else if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
+                if (!dansPageSon) {
+                    if (btnContinuer.hovered) quitter_pause = true;
+                    else if (btnSon.hovered) dansPageSon = true;
+                    else if (btnQuitter.hovered) exit(0);
+                } else {
+                    if (mx >= rectRetour.x && mx <= rectRetour.x + rectRetour.w &&
+                        my >= rectRetour.y && my <= rectRetour.y + rectRetour.h) {
+                        dansPageSon = false;
+                    } else if (mx >= sliderBar.x && mx <= sliderBar.x + sliderBar.w) {
+                        sliderKnob.x = mx - sliderKnob.w / 2;
+                        int volume = (sliderKnob.x - sliderBar.x) * 128 / sliderBar.w;
+                        if (volume < 0) volume = 0;
+                        if (volume > 128) volume = 128;
+                        Mix_VolumeMusic(volume);
+                    }
+                }
+            }
+        }
+        SDL_Delay(16);
+    }
+
+    if (flecheRetour) SDL_DestroyTexture(flecheRetour);
+    TTF_CloseFont(font);
+    return true;
+}
+
+
+
+
+
+
+
+
 void actionPerso(SDL_Renderer* renderer, Fighter* persoActuel, int equipeAdverse) {
     if (!policePrincipale || !policePetite) {
         SDL_Log("Police non chargée !");
@@ -522,6 +617,10 @@ void actionPerso(SDL_Renderer* renderer, Fighter* persoActuel, int equipeAdverse
                         SDL_Log("[DEBUG] %s est mis KO (PV = 0).", persoActuel->nom);
                         quit = true;
                         break;
+                    case SDLK_ESCAPE:
+                        afficher_pause(renderer);  // Affiche la page pause
+                        break;
+
                 }
             }
             
@@ -557,8 +656,10 @@ void actionPerso(SDL_Renderer* renderer, Fighter* persoActuel, int equipeAdverse
 
 
 void runGame(SDL_Renderer* rendu) {
+
     arreter_musique("ressource/musique/ogg/selection_personnages.ogg");
     SDL_GetWindowSize(fenetre, &screenWidth, &screenHeight);
+    
     
     partieActuelle.mapType = rand() % 9;
     
@@ -652,6 +753,7 @@ void runGame(SDL_Renderer* rendu) {
         }
 
         renduJeu(rendu);
+        SDL_Log("==================================== Tour %d =======================================", partieActuelle.tour);
         animationNouveauTour(rendu, partieActuelle.tour);
         int equipeDebut = (partieActuelle.tour % 2 == 0) ? partieActuelle.equipeQuiCommence : 3 - partieActuelle.equipeQuiCommence;
 
