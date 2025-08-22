@@ -1,3 +1,19 @@
+
+
+/*
+
+
+🛡️ Mur vivant
+🛡️ Barrière de pierre
+🛡️ Rugissement d'acier
+
+*/
+
+
+
+
+
+
 #include <stdio.h>
 #include <string.h>
 #include "attaque.h"
@@ -104,14 +120,14 @@ void attaqueClassique(Fighter* attaquant, Fighter* cible) {
     int equipeIncassable = (idIncassble <= 2) ? 1 : 2;
 
     if (dureeMur > 0 && equipeCibleInitiale == equipeIncassable) {
-    switch (idIncassble) {
-    case 0: vraieCible = &partieActuelle.joueur1.fighter1; break;
-    case 1: vraieCible = &partieActuelle.joueur1.fighter2; break;
-    case 2: vraieCible = &partieActuelle.joueur1.fighter3; break;
-    case 3: vraieCible = &partieActuelle.joueur2.fighter1; break;
-    case 4: vraieCible = &partieActuelle.joueur2.fighter2; break;
-    case 5: vraieCible = &partieActuelle.joueur2.fighter3; break;
-    }
+        switch (idIncassble) {
+            case 0: vraieCible = &partieActuelle.joueur1.fighter1; break;
+            case 1: vraieCible = &partieActuelle.joueur1.fighter2; break;
+            case 2: vraieCible = &partieActuelle.joueur1.fighter3; break;
+            case 3: vraieCible = &partieActuelle.joueur2.fighter1; break;
+            case 4: vraieCible = &partieActuelle.joueur2.fighter2; break;
+            case 5: vraieCible = &partieActuelle.joueur2.fighter3; break;
+            }
     }
 
 

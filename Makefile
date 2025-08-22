@@ -41,6 +41,7 @@ clean:
 	@rm -f $(EXEC)
 
 # Cible pour vérifier les fuites de mémoire avec valgrind
+
 valgrind: $(EXEC)
 	@echo "🎮 Lancement du jeu avec Valgrind..."
 	@valgrind --leak-check=full --track-origins=yes ./$(EXEC)

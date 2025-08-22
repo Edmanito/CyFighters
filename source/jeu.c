@@ -557,11 +557,10 @@ Page afficher_ecran_fin(SDL_Renderer* rendu, int gagnant) {
     SDL_DestroyTexture(fond);
     TTF_CloseFont(police);
 
-    // Pause 3 secondes avant de revenir au menu
+    // Pause 10 secondes avant de revenir au menu
     SDL_Delay(10000);
     return PAGE_MENU;
 }
-
 
 
 
@@ -787,7 +786,7 @@ void runGame(SDL_Renderer* rendu) {
         partieActuelle.tour++;
     }
 
-     // Détermination du gagnant
+     // Détermination du gagnant+
     int gagnant = -1;
     if (equipe_est_morte(1)) gagnant = 2;
     else if (equipe_est_morte(2)) gagnant = 1;

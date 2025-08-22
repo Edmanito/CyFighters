@@ -36,6 +36,9 @@ const char* getTexte(const char* id) {
         // === Chargement ===
         {"chargement", "Chargement en cours...", "Loading...", "Cargando...", "Wird geladen..."},
 
+
+
+        /*
         // === Histoire ===
         {"hist_1", "Dans un monde divisé par les royaumes...", 
                   "In a world divided by kingdoms...", 
@@ -57,7 +60,9 @@ const char* getTexte(const char* id) {
                   "Welcome to Project Shōnen Smash.", 
                   "Bienvenido a Project Shōnen Smash.", 
                   "Willkommen bei Project Shōnen Smash."},
-    };
+        */
+                  };
+
    
     // Recherche de l’identifiant et retour de la bonne langue
     for (unsigned int i = 0; i < sizeof(dico)/sizeof(dico[0]); i++) {

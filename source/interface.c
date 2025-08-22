@@ -40,9 +40,12 @@ void liberer_polices() {
     }
 }
 
+
 // ================================
 // Génération de texte en texture SDL
 // ================================
+
+
 SDL_Texture* generer_texte(SDL_Renderer* rendu, const char* texte, TTF_Font* police) {
     if (!texte || !police || !rendu) {
         SDL_Log("Erreur : paramètre nul dans generer_texte");

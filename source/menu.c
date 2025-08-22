@@ -10,21 +10,13 @@
 
 int volume_global = 20; // entre 0 et 128
 int musique_actuelle = 1; // 1, 2 ou 3
-
-
+//
 // Variables globales réelles
 int mode_choisi = 0;
 int chemin_retour = 0;
 int perso_choisi = -1;
 bool phraseJouee = false;
 int musiqueRes=1;
-
-
-
-
-
-
-
 
 
 
@@ -123,12 +115,6 @@ Page afficher_chargement(SDL_Renderer *rendu) {
     // Passe à la page histoire après le chargement
     return PAGE_HISTOIRE;
 }
-
-
-
-
-
-
 
 
 
@@ -245,22 +231,6 @@ Page afficher_histoire(SDL_Renderer* rendu) {
 
     return PAGE_MENU;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -539,12 +509,14 @@ Page afficher_options(SDL_Renderer* rendu, Page page_prec) {
         sprintf(texte_volume, "%d %%", volume_global * 100 / 128);
         SDL_Surface* surf_volume = TTF_RenderUTF8_Solid(police, texte_volume, blanc);
         SDL_Texture* tex_volume = SDL_CreateTextureFromSurface(rendu, surf_volume);
+        
         SDL_Rect txt = {
             barre.x + barre.w + 20,
             barre.y + (barre.h - surf_volume->h) / 2,
             surf_volume->w,
             surf_volume->h
         };
+
         SDL_Rect cadre_txt = {txt.x - 10, txt.y - 5, txt.w + 20, txt.h + 10};
         SDL_SetRenderDrawColor(rendu, 0, 0, 0, 200);
         SDL_RenderFillRect(rendu, &cadre_txt);
@@ -645,7 +617,7 @@ Page afficher_options(SDL_Renderer* rendu, Page page_prec) {
 
 Page afficher_credit(SDL_Renderer* rendu, Page page_prec){
     SDL_Event event;
-
+    
     SDL_Texture* bouton_retour = IMG_LoadTexture(rendu, "ressource/image/utilité/retour.png");
     SDL_Texture* fond = IMG_LoadTexture(rendu, "ressource/image/fonds/credit.png");
 
@@ -813,14 +785,6 @@ Page afficher_credit(SDL_Renderer* rendu, Page page_prec){
         }
     }
 }
-
-
-
-
-
-
-
-
 
 
 
@@ -1138,5 +1102,7 @@ Page afficher_selec_difficulte(SDL_Renderer* rendu) {
         }
     }
 }
+
+
 
 
