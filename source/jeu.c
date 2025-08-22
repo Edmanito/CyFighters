@@ -660,6 +660,9 @@ void runGame(SDL_Renderer* rendu) {
                     AttaqueSauvegarde* action = &tableauAttaqueDuTour[index];
                     int choix = rand() % 100;
 
+
+
+                    SDL_Log("Il faut revoir cette partie parce que l'ia n'est pas opti au max");
                     // === IA Facile ===
                     if (partieActuelle.iaDifficulte == 1) {
                         if (choix <= 10 && perso->pt >= perso->spe_atq1.cout)
